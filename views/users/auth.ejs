@@ -1,0 +1,119 @@
+<% layout("/layouts/boilerplate") %>
+
+<div class="auth-split-layout">
+    <div class="auth-hero">
+        <div class="auth-hero-overlay">
+            <h1><%= authMode === "signup" ? "Join the Community" : "Start Your Journey" %></h1>
+            <p>
+                Use one shared account screen for signup or login with password, Google, or phone verification.
+            </p>
+        </div>
+    </div>
+    <div class="auth-form-container">
+        <div class="auth-glass-card auth-glass-card-wide">
+            <div class="auth-logo">
+                <span class="brand-icon"><i class="fa-solid fa-compass"></i></span>
+                WanderLust
+            </div>
+            <h2><%= authMode === "signup" ? "Create your account" : "Welcome back" %></h2>
+            <p class="auth-sub">
+                <%= authMode === "signup" ? "Create your account here, or switch to login if you already have one." : "Login here, or create a new account if you're new." %>
+            </p>
+
+            <% if (authMode === "signup") { %>
+                <div class="auth-stack">
+                    <form action="/signup" method="POST" class="needs-validation auth-panel" novalidate>
+                        <div class="auth-panel-head">
+                            <h3>Email and password</h3>
+                            <p>Create a new account with your email address and a password.</p>
+                        </div>
+
+                        <div class="wl-form-group">
+                            <label for="email">Email address</label>
+                            <input name="email" id="email" type="email" placeholder="you@example.com" autocomplete="email" required />
+                        </div>
+
+                        <div class="wl-form-group">
+                            <label for="username">Username</label>
+                            <input name="username" id="username" type="text" placeholder="Choose a username" autocomplete="username" required />
+                        </div>
+
+                        <div class="wl-form-group">
+                            <label for="password">Password</label>
+                            <input name="password" id="password" type="password" placeholder="Create a strong password" autocomplete="new-password" required />
+                        </div>
+
+                        <button type="submit" class="btn-primary-wl auth-action">
+                            <i class="fa-solid fa-user-plus"></i> Create Account
+                        </button>
+                    </form>
+
+                    <div class="auth-divider"><span>or</span></div>
+
+                    <% if (authProviders.google) { %>
+                    <div class="auth-panel">
+                        <div class="auth-panel-head">
+                            <h3>Google</h3>
+                            <p>Use one-click signup with your Google account.</p>
+                        </div>
+
+                            <a href="/auth/google" class="btn-outline-wl auth-action auth-google-btn">
+                                <i class="fa-brands fa-google"></i> Continue with Google
+                            </a>
+                    </div>
+                    <% } %>
+                </div>
+
+                <p class="auth-footer">
+                    Already have an account? <a href="/auth?mode=login">Login</a>
+                </p>
+            <% } else { %>
+                <div class="auth-stack">
+                    <form action="/login" method="POST" class="needs-validation auth-panel" novalidate>
+                        <div class="auth-panel-head">
+                            <h3>Username and password</h3>
+                            <p>Use your existing account credentials to sign in.</p>
+                        </div>
+
+                        <div class="wl-form-group">
+                            <label for="login-username">Username</label>
+                            <input name="username" id="login-username" type="text" placeholder="Enter your username" autocomplete="username" required />
+                        </div>
+
+                        <div class="wl-form-group">
+                            <label for="login-password">Password</label>
+                            <input name="password" id="login-password" type="password" placeholder="Enter your password" autocomplete="current-password" required />
+                        </div>
+
+                        <div class="auth-inline-link">
+                            <a href="/forgot-password">Forgot password?</a>
+                        </div>
+
+                        <button type="submit" class="btn-primary-wl auth-action">
+                            <i class="fa-solid fa-right-to-bracket"></i> Login
+                        </button>
+                    </form>
+
+                    <div class="auth-divider"><span>or</span></div>
+
+                    <% if (authProviders.google) { %>
+                    <div class="auth-panel">
+                        <div class="auth-panel-head">
+                            <h3>Google</h3>
+                            <p>Use your Google account for fast sign-in.</p>
+                        </div>
+
+                            <a href="/auth/google" class="btn-outline-wl auth-action auth-google-btn">
+                                <i class="fa-brands fa-google"></i> Continue with Google
+                            </a>
+                    </div>
+                    <% } %>
+                </div>
+
+                <p class="auth-footer">
+                    Don't have an account? <a href="/auth?mode=signup">Sign up</a>
+                </p>
+            <% } %>
+        </div>
+    </div>
+</div>

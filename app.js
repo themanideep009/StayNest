@@ -1,117 +1,122 @@
-const express= require("express");
-const app=express();
+require("dotenv").config();
+
+const express = require("express");
 const path = require("path");
-const mongoose = require("mongoose")
-const Listing=require("./models/listing.js");
-const methodoverride=require("method-override");
-const ejsMate=require("ejs-mate");
-const ExpressError=require("./utils/ExpressError.js");
-const {listingSchema,reviewSchema}=require("./schema.js");
-const Review  =require("./models/review.js");
-const Mongo_URL = "mongodb://127.0.0.1:27017/wanderlust";
-const listings=require("./routes/listing.js");
-const reviews=require("./routes/review.js");
-const session=require("express-session");
+const mongoose = require("mongoose");
+const methodOverride = require("method-override");
+const ejsMate = require("ejs-mate");
+const session = require("express-session");
 const flash = require("connect-flash");
 const passport = require("passport");
-const LocalStrategy = require("passport-local");
-const User = require("./models/user.js");
-const user=require("./routes/user.js");
 
+const ExpressError = require("./utils/ExpressError.js");
+const listings = require("./routes/listing.js");
+const reviews = require("./routes/review.js");
+const user = require("./routes/user.js");
+const meta = require("./routes/meta.js");
+const { isGoogleAuthConfigured, isPhoneAuthConfigured } = require("./utils/auth.js");
+const { configurePassport } = require("./utils/passport.js");
 
+const app = express();
 
-main().then(()=>{
-    console.log("Connected to DB");
-})
-.catch((err)=>{ 
-    console.log(err); 
-})
-async function main(){
-    await mongoose.connect(Mongo_URL);
+const PORT = Number(process.env.PORT) || 3000;
+const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/wanderlust";
+const NODE_ENV = process.env.NODE_ENV || "development";
+const SESSION_SECRET = process.env.SESSION_SECRET || "dev-only-change-me";
+const APP_BASE_URL = process.env.APP_BASE_URL || `http://localhost:${PORT}`;
+
+if (SESSION_SECRET === "dev-only-change-me") {
+    console.warn("SESSION_SECRET is not set. Falling back to an insecure development secret.");
 }
-app.set("view engine","ejs");
-app.set("views",path.join(__dirname,"views"));
-app.use(express.urlencoded({extended:true}));
-app.use(methodoverride("_method"));
-app.engine('ejs',ejsMate);
-app.use(express.static(path.join(__dirname,"/public")));
-const sessionOptions = {
-    secret:"mysupersecretcode",
-    resave:false,
-    saveUninitialized:true,
-    cookie:{
-        expires: Date.now() + 7*24*60*60*1000,
-        maxAge:7*24*60*60*1000,
-        httpOnly:true,
-    }
-};
-app.use(session(sessionOptions));
+
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+app.engine("ejs", ejsMate);
+
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
+app.use(express.static(path.join(__dirname, "public")));
+
+if (NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+}
+
+app.use(
+    session({
+        secret: SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            httpOnly: true,
+            sameSite: "lax",
+            secure: NODE_ENV === "production",
+        },
+    })
+);
 app.use(flash());
 
-//Passport
 app.use(passport.initialize());
 app.use(passport.session());
-passport.use(new LocalStrategy(User.authenticate()));
+configurePassport(passport, { appBaseUrl: APP_BASE_URL });
 
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
-
-
-let port = 3000; 
-app.listen(port,()=>{
-    console.log("Server is Running on 3000");
-})
-
-
-app.use((req,res,next)=>{
-    res.locals.success=req.flash("success");
-    res.locals.error=req.flash("error");
+app.use((req, res, next) => {
+    res.locals.success = req.flash("success");
+    res.locals.error = req.flash("error");
+    res.locals.currUser = req.user;
+    res.locals.currentPath = req.path;
+    res.locals.currentYear = new Date().getFullYear();
+    res.locals.authProviders = {
+        google: isGoogleAuthConfigured(),
+        phone: isPhoneAuthConfigured() || NODE_ENV !== "production",
+    };
     next();
 });
 
-//RegisterUser
-app.get("/demouser", async(req,res)=>{
-    let fakeUser= new User({
-        email:"student@gmail.com",
-        username:"delta-student",
-    });
-    let registeredUser = await User.register(fakeUser,"helloWorld");
-    res.send(registeredUser);
-})
-
-app.use("/listings",listings);
-app.use("/listings/:id/reviews",reviews);
-app.use("/",user);
-
-app.get('/',(req,res)=>{
-    console.log("OK!!!!");
-    res.send("Welcome  to the WanderLust");
-})
-
-// app.get('/testlisting',async(req,res)=>{
-//     let sampleLisiting = new Listing({
-//         title:"My New Villa",
-//         description:"By the beach",
-//         price:1200,
-//         location:"Hyderabad",
-//         country:"India",
-//     });
-//     await sampleLisiting.save();
-//     console.log("OK OK");
-//     res.send("Successful testing");
-// })
-
-
-
-
-app.use((err,req,res,next)=>{
-   let{statusCode=500,message="Something Went Wrong"}=err;
-    res.status(statusCode).render("listings/error.ejs",{err});
-})
-
-app.all(/.*/,(req,res,next)=>{
-    next(new ExpressError(404,"Page Not Found"));
+app.get("/", (req, res) => {
+    res.redirect("/listings");
 });
 
+app.use("/listings", listings);
+app.use("/listings/:id/reviews", reviews);
+app.use("/", user);
+app.use("/", meta);
 
+app.all(/.*/, (req, res, next) => {
+    next(new ExpressError(404, "Page Not Found"));
+});
 
+app.use((err, req, res, next) => {
+    err.statusCode = err.statusCode || 500;
+    err.message = err.message || "Something Went Wrong";
+
+    if (err.statusCode >= 500) {
+        console.error(err);
+    }
+
+    res.status(err.statusCode).render("listings/error.ejs", { err });
+});
+
+async function connectDB() {
+    await mongoose.connect(MONGO_URL);
+    console.log("Connected to MongoDB");
+}
+
+async function startServer() {
+    try {
+        await connectDB();
+        app.listen(PORT, () => {
+            console.log(`Server running at http://localhost:${PORT}`);
+        });
+    } catch (err) {
+        console.error("Failed to start server:", err);
+        process.exit(1);
+    }
+}
+
+if (require.main === module) {
+    startServer();
+}
+
+module.exports = { app, connectDB, startServer };

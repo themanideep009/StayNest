@@ -1,15 +1,29 @@
-<nav class="navbar navbar-expand-lg bg-body-light border-bottom sticky-top">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="/"><i class="fa-solid fa-compass"></i></a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
+<nav class="wl-navbar">
+    <a href="/listings" class="wl-brand">
+        <span class="brand-icon"><i class="fa-solid fa-compass"></i></span>
+        WanderLust
+    </a>
+
+    <button class="wl-hamburger" id="navToggle" aria-label="Toggle navigation">
+        <i class="fa-solid fa-bars"></i>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-      <div class="navbar-nav">
-        <a class="nav-link "  href="/">Home</a>
-        <a class="nav-link" href="/listings">All Listing</a>
-        <a class="nav-link" href="/listings/new">Add New Listing</a>
-      </div>
-    </div>
-  </div>
+
+    <ul class="wl-nav-links" id="navLinks">
+        <li><a href="/listings" class="<%= currentPath === '/listings' ? 'active' : '' %>"><i class="fa-solid fa-compass" style="margin-right:5px;opacity:0.6;"></i>Explore</a></li>
+        <li><a href="/about" class="<%= currentPath === '/about' ? 'active' : '' %>">About</a></li>
+        <li><a href="/help" class="<%= currentPath === '/help' ? 'active' : '' %>">Help</a></li>
+
+        <% if (currUser) { %>
+            <li><a href="/dashboard" class="<%= currentPath === '/dashboard' ? 'active' : '' %>">Dashboard</a></li>
+            <li><a href="/listings/new"><i class="fa-solid fa-plus" style="margin-right:5px;opacity:0.6;"></i>Add Place</a></li>
+            <li>
+                <a href="/logout" class="btn-nav-primary" style="display:inline-flex;align-items:center;gap:6px;">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    <small style="opacity:0.8;font-weight:400;">(<%= currUser.username %>)</small>
+                </a>
+            </li>
+        <% } else { %>
+            <li><a href="/auth?mode=login" class="btn-nav-primary">Login</a></li>
+        <% } %>
+    </ul>
 </nav>

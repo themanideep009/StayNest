@@ -1,31 +1,203 @@
-<% layout("/layouts/boilerplate")%>
-<body>
-    <h3>All Listings</h3>
-    <!-- <form method="get" action="/listings/new">
-    <button>Create New Listing</button></form> -->
-    
-    <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
-    <% for(let listing of alllistings){ %>
-    <a href="/listings/<%=listing._id%>" class="listing-link">
-        <div class="card col" >
-        <img src="<%=listing.image%>" class="card-img-top" alt="Listing_image" style="height: 20rem;"/>
-        <div class="card-img-overlay"></div>
-        <div class="card-body">
-            <b><p class="card-text"><%=listing.title%></p></b>
-            <p>Price: &#8377;<%= listing.price.toLocaleString("en-IN") %></p>
+<% layout("/layouts/boilerplate") %>
+
+<section class="hero-panel">
+    <div class="hero-copy">
+        <span class="eyebrow hero-kicker">Curated stays for every kind of trip</span>
+        <h1>Find your next favorite place to stay.</h1>
+        <p>
+            Search beautiful places, compare prices, and manage your own hosted spaces in one clean dashboard.
+        </p>
+        <div class="hero-actions">
+            <a href="#browse" class="btn-primary-wl">
+                <i class="fa-solid fa-magnifying-glass"></i> Browse stays
+            </a>
+            <% if (currUser) { %>
+                <a href="/dashboard" class="btn-outline-wl">
+                    <i class="fa-solid fa-chart-line"></i> Open dashboard
+                </a>
+            <% } else { %>
+                <a href="/auth?mode=signup" class="btn-outline-wl">
+                    <i class="fa-solid fa-user-plus"></i> Create account
+                </a>
+            <% } %>
         </div>
     </div>
-    </a>
-     <% }%>
-     </div>
-    <!-- <ul>
-       <% for(let listing of alllistings){ %>
-            <li><a href="/listings/<%=listing._id%>"><%=listing.title%></a></li>
-            <li><%=listing.description%></li>
-            <li><%=listing.price%></li>
-            <li><%=listing.location%></li>
-            <li><%=listing.country%></li>
-            <img src="<%=listing.image%>">
-       <% }%>
-    </ul> -->
-</body>
+
+    <div class="hero-stats">
+        <div class="stat-card stat-card-accent">
+            <span class="stat-icon"><i class="fa-solid fa-house"></i></span>
+            <span class="stat-label">Places</span>
+            <strong><%= stats.totalListings %></strong>
+        </div>
+        <div class="stat-card stat-card-highlight">
+            <span class="stat-icon"><i class="fa-solid fa-earth-asia"></i></span>
+            <span class="stat-label">Countries</span>
+            <strong><%= stats.totalCountries %></strong>
+        </div>
+        <div class="stat-card stat-card-soft">
+            <span class="stat-icon"><i class="fa-solid fa-wallet"></i></span>
+            <span class="stat-label">Avg price</span>
+            <strong>&#8377;<%= stats.avgPrice.toLocaleString("en-IN") %></strong>
+        </div>
+        <div class="stat-card stat-card-rating">
+            <span class="stat-icon"><i class="fa-solid fa-star"></i></span>
+            <span class="stat-label">Rating</span>
+            <strong><%= stats.avgRating %></strong>
+        </div>
+    </div>
+</section>
+
+<section class="experience-service-shell">
+    <div class="experience-service-grid">
+        <div class="experience-column">
+            <div class="page-header experience-service-header">
+                <div>
+                    <span class="eyebrow">Experiences</span>
+                    <h2><i class="fa-solid fa-route" style="margin-right:10px;color:var(--highlight);"></i>Plan more than just the stay</h2>
+                    <p class="section-subtle">Turn every booking into a fuller trip with ideas designed around local exploration.</p>
+                </div>
+            </div>
+
+            <div class="feature-card-grid">
+                <% for (let experience of featuredExperiences) { %>
+                    <article class="feature-card feature-card-experience">
+                        <div class="feature-icon"><i class="<%= experience.icon %>"></i></div>
+                        <h3><%= experience.title %></h3>
+                        <p><%= experience.description %></p>
+                        <span class="feature-meta"><%= experience.meta %></span>
+                    </article>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="service-column">
+            <div class="page-header experience-service-header">
+                <div>
+                    <span class="eyebrow">Services</span>
+                    <h2><i class="fa-solid fa-star" style="margin-right:10px;color:var(--accent);"></i>Everything organized around comfort</h2>
+                    <p class="section-subtle">The platform helps both guests and hosts move through planning, booking, and management smoothly.</p>
+                </div>
+            </div>
+
+            <div class="feature-card-grid">
+                <% for (let service of featuredServices) { %>
+                    <article class="feature-card feature-card-service">
+                        <div class="feature-icon"><i class="<%= service.icon %>"></i></div>
+                        <h3><%= service.title %></h3>
+                        <p><%= service.description %></p>
+                    </article>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="discover-shell" id="browse">
+    <div class="page-header">
+        <div>
+            <span class="eyebrow">Discover</span>
+            <h2><i class="fa-solid fa-globe" style="margin-right:10px;color:var(--accent);"></i>Explore Stays</h2>
+            <p class="section-subtle">
+                <%= stats.resultCount %> result<%= stats.resultCount === 1 ? "" : "s" %> matched your current filters.
+            </p>
+        </div>
+        <% if (currUser) { %>
+            <a href="/listings/new" class="btn-primary-wl">
+                <i class="fa-solid fa-plus"></i> Add Place
+            </a>
+        <% } %>
+    </div>
+
+    <form action="/listings" method="GET" class="filter-panel">
+        <div class="filter-grid">
+            <div class="wl-form-group">
+                <label for="q">Search</label>
+                <input id="q" name="q" type="text" value="<%= filters.q %>" placeholder="Search title, location, or country" />
+            </div>
+
+            <div class="wl-form-group">
+                <label for="countryFilter">Country</label>
+                <select id="countryFilter" name="country">
+                    <option value="">All countries</option>
+                    <% for (let option of countries) { %>
+                        <option value="<%= option %>" <%= filters.country === option ? "selected" : "" %>><%= option %></option>
+                    <% } %>
+                </select>
+            </div>
+
+            <div class="wl-form-group">
+                <label for="minPrice">Min price</label>
+                <input id="minPrice" name="minPrice" type="number" min="0" value="<%= filters.minPrice %>" placeholder="0" />
+            </div>
+
+            <div class="wl-form-group">
+                <label for="maxPrice">Max price</label>
+                <input id="maxPrice" name="maxPrice" type="number" min="0" value="<%= filters.maxPrice %>" placeholder="5000" />
+            </div>
+
+            <div class="wl-form-group">
+                <label for="sort">Sort</label>
+                <select id="sort" name="sort">
+                    <option value="newest" <%= filters.sort === "newest" ? "selected" : "" %>>Newest first</option>
+                    <option value="priceAsc" <%= filters.sort === "priceAsc" ? "selected" : "" %>>Price: low to high</option>
+                    <option value="priceDesc" <%= filters.sort === "priceDesc" ? "selected" : "" %>>Price: high to low</option>
+                    <option value="title" <%= filters.sort === "title" ? "selected" : "" %>>Title A-Z</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button type="submit" class="btn-primary-wl">
+                <i class="fa-solid fa-sliders"></i> Apply filters
+            </button>
+            <a href="/listings" class="btn-outline-wl">
+                <i class="fa-solid fa-rotate-left"></i> Reset
+            </a>
+        </div>
+    </form>
+
+    <% if (alllistings.length === 0) { %>
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fa-solid fa-compass"></i></div>
+            <h3>No places matched these filters</h3>
+            <p>Try a broader search, reset your filters, or add a new stay to get things moving.</p>
+            <div class="hero-actions" style="justify-content:center;margin-top:1.5rem;">
+                <a href="/listings" class="btn-outline-wl">Clear Filters</a>
+                <% if (currUser) { %>
+                    <a href="/listings/new" class="btn-primary-wl">Add First Place</a>
+                <% } %>
+            </div>
+        </div>
+    <% } else { %>
+        <div class="listings-grid">
+            <% for (let listing of alllistings) { %>
+                <a href="/listings/<%= listing._id %>" class="listing-card">
+                    <div class="card-overflow">
+                        <img src="<%= listing.image %>" alt="<%= listing.title %>" loading="lazy" />
+                    </div>
+                    <div class="listing-card-body">
+                        <div class="listing-card-topline">
+                            <span class="listing-pill"><%= listing.country %></span>
+                            <% if (listing.owner) { %>
+                                <span class="listing-host">by <%= listing.owner.username %></span>
+                            <% } %>
+                        </div>
+                        <h5><%= listing.title %></h5>
+                        <p class="location">
+                            <i class="fa-solid fa-location-dot" style="margin-right:4px;"></i>
+                            <%= listing.location %>, <%= listing.country %>
+                        </p>
+                        <p class="listing-description"><%= listing.description.slice(0, 96) %><%= listing.description.length > 96 ? "..." : "" %></p>
+                        <div class="listing-card-footer">
+                            <p class="price">
+                                &#8377;<%= listing.price.toLocaleString("en-IN") %>
+                                <span>/ night</span>
+                            </p>
+                            <span class="card-link">View stay <i class="fa-solid fa-arrow-right"></i></span>
+                        </div>
+                    </div>
+                </a>
+            <% } %>
+        </div>
+    <% } %>
+</section>

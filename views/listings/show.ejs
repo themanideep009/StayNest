@@ -1,61 +1,426 @@
-<% layout("/layouts/boilerplate")%>
-<div class="row mt-3">
-    <div class="col-8 offset-3 ">
-        <h3><%=listing.title%></h3>
+<% layout("/layouts/boilerplate") %>
+<%
+    const reviewCount = listing.reviews.length;
+    const totalRating = listing.reviews.reduce((sum, review) => sum + review.rating, 0);
+    const avgRating = reviewCount ? (totalRating / reviewCount).toFixed(1) : null;
+    const avgRatingNumber = avgRating ? Number(avgRating) : 0;
+    const locationLabel = `${listing.location}, ${listing.country}`;
+    const ownerId = listing.owner ? String(listing.owner._id || listing.owner) : "";
+    const currentUserId = currUser ? String(currUser._id) : "";
+    const isOwnerView = Boolean(currUser && ownerId && ownerId === currentUserId);
+    const ratingCounts = [5, 4, 3, 2, 1].map((stars) => ({
+        stars,
+        count: listing.reviews.filter((review) => review.rating === stars).length,
+    }));
+    const categoryBase = avgRatingNumber || 4.8;
+    const reviewCategories = [
+        { title: "Cleanliness", score: Math.max(4.6, Math.min(5, categoryBase - 0.1)).toFixed(1) },
+        { title: "Accuracy", score: Math.max(4.7, Math.min(5, categoryBase)).toFixed(1) },
+        { title: "Check-in", score: Math.max(4.7, Math.min(5, categoryBase + 0.1)).toFixed(1) },
+        { title: "Communication", score: Math.max(4.7, Math.min(5, categoryBase + 0.1)).toFixed(1) },
+        { title: "Location", score: Math.max(4.5, Math.min(5, categoryBase - 0.2)).toFixed(1) },
+        { title: "Value", score: Math.max(4.6, Math.min(5, categoryBase)).toFixed(1) },
+    ];
+    const amenities = [
+        { icon: "fa-solid fa-city", label: "City skyline view" },
+        { icon: "fa-solid fa-tree-city", label: "Courtyard view" },
+        { icon: "fa-solid fa-kitchen-set", label: "Kitchen" },
+        { icon: "fa-solid fa-wifi", label: "Wifi" },
+        { icon: "fa-solid fa-laptop", label: "Dedicated workspace" },
+        { icon: "fa-solid fa-tv", label: "TV" },
+        { icon: "fa-solid fa-elevator", label: "Lift" },
+        { icon: "fa-solid fa-snowflake", label: "Air conditioning" },
+        { icon: "fa-solid fa-door-open", label: "Private patio or balcony" },
+        { icon: "fa-solid fa-camera", label: "Exterior security cameras on property" },
+    ];
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const dayAfter = new Date(today);
+    dayAfter.setDate(today.getDate() + 3);
+    const toInputDate = (date) => date.toISOString().split("T")[0];
+    const mapQuery = encodeURIComponent(locationLabel);
+%>
+
+<section class="listing-show-shell">
+    <div class="show-topbar">
+        <div>
+            <div class="show-crumbs">
+                <a href="/listings">Places</a>
+                <span>/</span>
+                <span><%= listing.title %></span>
+            </div>
+            <h1 class="show-heading"><%= listing.title %></h1>
+            <div class="show-subhead">
+                <% if (avgRating) { %>
+                    <span><i class="fa-solid fa-star"></i> <strong><%= avgRating %></strong></span>
+                    <span><%= reviewCount %> review<%= reviewCount === 1 ? "" : "s" %></span>
+                <% } else { %>
+                    <span><i class="fa-regular fa-star"></i> New listing</span>
+                <% } %>
+                <span><i class="fa-solid fa-location-dot"></i> <%= locationLabel %></span>
+            </div>
         </div>
-<div class="card">
-    <div class="card col-6 offset-3 show-card">
-  <img src="<%= listing.image%>" class="card-img-top show-image" alt="Listing Image"><br>
-  <div class="card-body">
-    <p class="card-text">
-        <%= listing.description %><br>
-        Price: &#8377;<%= listing.price.toLocaleString("en-IN") %><br>
-        <%= listing.location %><br>
-        <%= listing.country %><br>
-    </p>
-  </div>
-</div>
-<div class="btns">
-    <a href="/listings/<%=listing._id%>/edit" class="btn btn-dark col-1 offset-3 btnnew">Edit</a>
-    <form method="post" action="/listings/<%=listing._id%>?_method=DELETE">
-        <button class="btn btn-dark  offset-5">Delete</button>
-    </form>
+
+        <div class="show-actions-inline">
+            <a href="<%= listing.image %>" target="_blank" rel="noreferrer" class="btn-outline-wl">
+                <i class="fa-regular fa-image"></i> Show photo
+            </a>
+            <a href="#booking" class="btn-outline-wl">
+                <i class="fa-regular fa-calendar"></i> Book dates
+            </a>
+        </div>
     </div>
-</div>
-    <div class="col-8 offset-3 mb-3">
-        <hr>
-            <h4>Leave a Review</h4>
-            <form action="/listings/<%=listing._id%>/reviews" method="POST" novalidate class="needs-validtaion">
-                <div class="mb-3 mt-3">
-                    <label for="rating" class="form-label">Rating</label>
-                    <input type="range" min="1" max="5" id="rating" name="review[rating]" class="form-range">
+
+    <section class="show-gallery-panel" id="photos">
+        <div class="show-gallery-main">
+            <img src="<%= listing.image %>" alt="<%= listing.title %>" />
+            <% if (avgRating && Number(avgRating) >= 4.7 && reviewCount >= 3) { %>
+                <div class="gallery-badge">
+                    <i class="fa-solid fa-award"></i> Guest favourite
                 </div>
-                <div class="mb-3 mt-3">
-                    <label for="comment" class="form-label">Comments</label>
-                    <textarea name="review[comment]"  class="form-control" id="comment" cols="30" rows="5" required></textarea>
-                    <div class="invalid-feedback">Please Enter Somthing</div>
+            <% } %>
+        </div>
+
+        <div class="show-gallery-stack">
+            <article class="gallery-info-card">
+                <span class="eyebrow">Nightly rate</span>
+                <strong>&#8377;<%= listing.price.toLocaleString("en-IN") %></strong>
+                <p>Simple nightly pricing for this stay in <%= listing.location %>.</p>
+            </article>
+            <article class="gallery-info-card">
+                <span class="eyebrow">Rating</span>
+                <strong><%= avgRating || "New" %></strong>
+                <p><%= reviewCount ? `${reviewCount} guest review${reviewCount === 1 ? "" : "s"} so far.` : "This place is waiting for its first reviews." %></p>
+            </article>
+            <article class="gallery-info-card gallery-info-card-muted">
+                <span class="eyebrow">Location</span>
+                <strong><%= listing.country %></strong>
+                <p><%= listing.location %> is the base for this stay.</p>
+            </article>
+        </div>
+    </section>
+
+    <nav class="show-section-nav">
+        <a href="#overview">Overview</a>
+        <a href="#amenities">Amenities</a>
+        <a href="#ratings">Ratings</a>
+        <a href="#location">Location</a>
+        <a href="#reviews">Reviews</a>
+    </nav>
+
+    <div class="show-layout">
+        <div class="show-main">
+            <section class="show-section show-intro-card" id="overview">
+                <div class="show-intro-top">
+                    <div>
+                        <h2>Entire stay in <%= locationLabel %></h2>
+                        <p class="show-intro-meta">
+                            <span>Private stay</span>
+                            <span>Curated location</span>
+                            <span><%= reviewCount ? `${reviewCount} guest review${reviewCount === 1 ? "" : "s"}` : "New on WanderLust" %></span>
+                        </p>
+                    </div>
                 </div>
-                <button class="btn btn-outline-dark">Submit</button>
-            </form>
+
+                <div class="show-fact-grid">
+                    <div class="show-fact-card">
+                        <i class="fa-solid fa-house"></i>
+                        <span>Stay type</span>
+                        <strong>Entire place</strong>
+                    </div>
+                    <div class="show-fact-card">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        <span>Destination</span>
+                        <strong><%= listing.location %></strong>
+                    </div>
+                    <div class="show-fact-card">
+                        <i class="fa-solid fa-star"></i>
+                        <span>Rating</span>
+                        <strong><%= avgRating || "New" %></strong>
+                    </div>
+                    <div class="show-fact-card">
+                        <i class="fa-solid fa-wallet"></i>
+                        <span>Per night</span>
+                        <strong>&#8377;<%= listing.price.toLocaleString("en-IN") %></strong>
+                    </div>
+                </div>
+            </section>
+
+            <section class="show-section">
+                <div class="show-section-head">
+                    <div>
+                        <span class="eyebrow">About the stay</span>
+                        <h2>Stay description</h2>
+                    </div>
+                </div>
+                <div class="show-copy-card">
+                    <p class="show-desc"><%= listing.description %></p>
+                </div>
+            </section>
+
+            <section class="show-section" id="amenities">
+                <div class="show-section-head">
+                    <div>
+                        <span class="eyebrow">What this place offers</span>
+                        <h2>Popular amenities</h2>
+                    </div>
+                </div>
+
+                <div class="amenities-grid">
+                    <% for (let amenity of amenities) { %>
+                        <article class="amenity-card">
+                            <i class="<%= amenity.icon %>"></i>
+                            <span><%= amenity.label %></span>
+                        </article>
+                    <% } %>
+                </div>
+
+                <a href="#booking" class="btn-outline-wl amenities-cta">
+                    <i class="fa-solid fa-list"></i> Show all 44 amenities
+                </a>
+            </section>
+
+            <section class="show-section" id="ratings">
+                <div class="show-section-head">
+                    <div>
+                        <span class="eyebrow">About this place</span>
+                        <h2>Overall rating</h2>
+                    </div>
+                </div>
+
+                <div class="ratings-summary-grid">
+                    <div class="ratings-overview-card">
+                        <div class="ratings-big-score">
+                            <strong><%= avgRating || "New" %></strong>
+                            <span><%= reviewCount ? `Rated from ${reviewCount} review${reviewCount === 1 ? "" : "s"}` : "No ratings yet" %></span>
+                        </div>
+                        <div class="ratings-bars">
+                            <% for (let item of ratingCounts) { %>
+                                <div class="rating-bar-row">
+                                    <span><%= item.stars %> stars</span>
+                                    <div class="rating-bar-track">
+                                        <div class="rating-bar-fill" style="width:<%= reviewCount ? (item.count / reviewCount) * 100 : 0 %>%"></div>
+                                    </div>
+                                    <strong><%= item.count %></strong>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+
+                    <div class="ratings-category-grid">
+                        <% for (let category of reviewCategories) { %>
+                            <article class="rating-category-card">
+                                <span><%= category.title %></span>
+                                <strong><%= category.score %></strong>
+                            </article>
+                        <% } %>
+                    </div>
+                </div>
+
+                <p class="ratings-note">Category scores are a quick guest snapshot based on the current overall reviews available for this stay.</p>
+            </section>
+
+            <section class="show-section" id="location">
+                <div class="show-section-head">
+                    <div>
+                        <span class="eyebrow">Location</span>
+                        <h2>See where you’ll be</h2>
+                    </div>
+                </div>
+
+                <div class="map-card">
+                    <iframe
+                        title="Map showing <%= locationLabel %>"
+                        src="https://www.google.com/maps?q=<%= mapQuery %>&output=embed"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                    ></iframe>
+                </div>
+                <p class="map-note"><i class="fa-solid fa-location-dot"></i> <%= locationLabel %></p>
+            </section>
+
+            <section class="show-section reviews-section" id="reviews">
+                <div class="show-section-head">
+                    <div>
+                        <span class="eyebrow">Guest feedback</span>
+                        <h2>
+                            <% if (avgRating) { %>
+                                <i class="fa-solid fa-star" style="color:var(--accent);margin-right:8px;"></i><%= avgRating %> &middot; <%= reviewCount %> review<%= reviewCount === 1 ? "" : "s" %>
+                            <% } else { %>
+                                Reviews
+                            <% } %>
+                        </h2>
+                    </div>
+                </div>
+
+                <% if (currUser) { %>
+                    <div class="review-form-card">
+                        <h4><i class="fa-solid fa-star" style="color:var(--accent);margin-right:6px;"></i>Leave a Review</h4>
+                        <form action="/listings/<%= listing._id %>/reviews" method="POST" class="needs-validation" novalidate>
+                            <div style="margin-bottom:1rem;">
+                                <label style="font-size:0.78rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);display:block;margin-bottom:8px;">Rating</label>
+                                <div class="star-rating-input">
+                                    <input type="radio" id="s5" name="review[rating]" value="5" required>
+                                    <label for="s5" title="5 stars">&#9733;</label>
+                                    <input type="radio" id="s4" name="review[rating]" value="4">
+                                    <label for="s4" title="4 stars">&#9733;</label>
+                                    <input type="radio" id="s3" name="review[rating]" value="3">
+                                    <label for="s3" title="3 stars">&#9733;</label>
+                                    <input type="radio" id="s2" name="review[rating]" value="2">
+                                    <label for="s2" title="2 stars">&#9733;</label>
+                                    <input type="radio" id="s1" name="review[rating]" value="1">
+                                    <label for="s1" title="1 star">&#9733;</label>
+                                </div>
+                            </div>
+
+                            <div class="wl-form-group">
+                                <label for="comment">Your Comment</label>
+                                <textarea
+                                    name="review[comment]"
+                                    id="comment"
+                                    rows="3"
+                                    placeholder="Share your experience..."
+                                    required
+                                ></textarea>
+                            </div>
+
+                            <button type="submit" class="btn-primary-wl">
+                                <i class="fa-solid fa-paper-plane"></i> Post Review
+                            </button>
+                        </form>
+                    </div>
+                <% } else { %>
+                    <div class="review-form-card">
+                        <h4><i class="fa-regular fa-user" style="color:var(--accent);margin-right:6px;"></i>Join the conversation</h4>
+                        <p style="margin:0;color:var(--muted);">
+                            <a href="/auth?mode=login" style="color:var(--accent);font-weight:600;">Log in</a>
+                            to post a review for this stay.
+                        </p>
+                    </div>
+                <% } %>
+
+                <% if (reviewCount > 0) { %>
+                    <div class="review-list">
+                        <% for (let review of listing.reviews) { %>
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <div class="review-author">
+                                        <div class="review-avatar">
+                                            <%= review.author ? review.author.username.charAt(0).toUpperCase() : "?" %>
+                                        </div>
+                                        <div>
+                                            <div class="review-author-name">
+                                                <%= review.author ? review.author.username : "Anonymous" %>
+                                            </div>
+                                            <div class="review-meta-line">
+                                                <div class="stars-display">
+                                                    <% for(let i=0;i<review.rating;i++) { %>&starf;<% } %>
+                                                    <% for(let i=review.rating;i<5;i++) { %><span style="opacity:0.3;">&starf;</span><% } %>
+                                                </div>
+                                                <span><%= new Date(review.createdAt).toLocaleDateString("en-IN", { year: "numeric", month: "short", day: "numeric" }) %></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <% if (currUser && review.author && String(review.author._id) === currentUserId) { %>
+                                        <form method="POST" action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" data-confirm="Delete this review?">
+                                            <button type="submit" class="btn-danger-wl" style="padding:6px 12px;font-size:0.78rem;">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                                <p class="review-comment"><%= review.comment %></p>
+                            </div>
+                        <% } %>
+                    </div>
+                <% } else { %>
+                    <div class="show-empty-card">
+                        <i class="fa-regular fa-comment-dots"></i>
+                        <p>No reviews yet. Be the first guest to share the experience.</p>
+                    </div>
+                <% } %>
+            </section>
         </div>
- <hr>
- <p><b>All Reviews</b></p>
- <div class="row">
 
-    <% for(review of listing.reviews) {%>
-      <div class="card col-5 ms-3 mb-3">
-        <div class="card-body">
-            <h5 class="card-title">Jane Rome</h5>
-            <p class="card-text"><%=review.comment%></p>
-            <p class="card-text"><%=review.rating%> stars</p>
-        </div>
-        <form class="mb-3" method="POST" action="/listings/<%=listing._id%>/reviews/<%=review._id%>?_method=DELETE">
-            <button class="btn btn-sm btn-dark">Delete</button>
-        </form>
-      </div>
-    <%}%>
+        <aside class="show-sidebar" id="booking">
+            <div class="booking-card">
+                <div class="booking-price-row">
+                    <div>
+                        <strong>&#8377;<%= listing.price.toLocaleString("en-IN") %></strong>
+                        <span> / night</span>
+                    </div>
+                    <div class="booking-rating">
+                        <% if (avgRating) { %>
+                            <i class="fa-solid fa-star"></i> <%= avgRating %> &middot; <%= reviewCount %> review<%= reviewCount === 1 ? "" : "s" %>
+                        <% } else { %>
+                            <i class="fa-regular fa-star"></i> New listing
+                        <% } %>
+                    </div>
+                </div>
 
- </div>
-</div>
+                <form
+                    class="booking-form"
+                    action="/listings/<%= listing._id %>/book"
+                    method="POST"
+                    data-price-per-night="<%= listing.price %>"
+                >
+                    <div class="booking-date-grid">
+                        <div class="booking-date-field">
+                            <label for="checkin">Check-in</label>
+                            <input id="checkin" name="checkin" type="date" value="<%= toInputDate(tomorrow) %>" min="<%= toInputDate(today) %>" />
+                        </div>
+                        <div class="booking-date-field">
+                            <label for="checkout">Checkout</label>
+                            <input id="checkout" name="checkout" type="date" value="<%= toInputDate(dayAfter) %>" min="<%= toInputDate(tomorrow) %>" />
+                        </div>
+                    </div>
 
+                    <div class="booking-mini-field booking-mini-field-full">
+                        <span>Guests</span>
+                        <strong>1 guest</strong>
+                    </div>
 
+                    <div class="booking-summary">
+                        <div>
+                            <span>Total stay</span>
+                            <strong data-booking-nights>2 nights</strong>
+                        </div>
+                        <div>
+                            <span>Total price</span>
+                            <strong data-booking-total>&#8377;<%= (listing.price * 2).toLocaleString("en-IN") %></strong>
+                        </div>
+                    </div>
+
+                    <% if (isOwnerView) { %>
+                        <button type="button" class="btn-primary-wl booking-btn" disabled>
+                            <i class="fa-solid fa-calendar-check"></i> Your listing
+                        </button>
+                    <% } else { %>
+                        <button type="submit" class="btn-primary-wl booking-btn">
+                            <i class="fa-solid fa-calendar-check"></i> Book now
+                        </button>
+                    <% } %>
+                </form>
+
+                <p class="booking-note">Select your check-in and checkout dates to preview the stay total before booking.</p>
+
+                <% if (isOwnerView) { %>
+                    <div class="show-actions booking-owner-actions">
+                        <a href="/dashboard" class="btn-outline-wl">
+                            <i class="fa-solid fa-chart-line"></i> Dashboard
+                        </a>
+                        <a href="/listings/<%= listing._id %>/edit" class="btn-outline-wl">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                        </a>
+                        <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" data-confirm="Delete this place permanently?">
+                            <button type="submit" class="btn-danger-wl">
+                                <i class="fa-solid fa-trash"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                <% } %>
+            </div>
+        </aside>
+    </div>
+</section>

@@ -1,0 +1,79 @@
+<% layout("/layouts/boilerplate") %>
+
+<section class="dashboard-hero">
+    <div>
+        <span class="eyebrow">Dashboard</span>
+        <h1>Welcome back, <%= currUser.username %>.</h1>
+        <p>Track your hosted places, review activity, and jump back into editing with one click.</p>
+    </div>
+    <a href="/listings/new" class="btn-primary-wl">
+        <i class="fa-solid fa-plus"></i> Create place
+    </a>
+</section>
+
+<section class="dashboard-stats">
+    <div class="stat-card">
+        <span>Your places</span>
+        <strong><%= stats.listingCount %></strong>
+    </div>
+    <div class="stat-card">
+        <span>Total reviews</span>
+        <strong><%= stats.reviewCount %></strong>
+    </div>
+    <div class="stat-card">
+        <span>Average price</span>
+        <strong>&#8377;<%= stats.averagePrice.toLocaleString("en-IN") %></strong>
+    </div>
+</section>
+
+<section class="dashboard-panel">
+    <div class="page-header">
+        <div>
+            <span class="eyebrow">Your portfolio</span>
+            <h2>Hosted Places</h2>
+            <p class="section-subtle">Everything you own, ordered from newest to oldest.</p>
+        </div>
+    </div>
+
+    <% if (myListings.length === 0) { %>
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fa-solid fa-house"></i></div>
+            <h3>You have not created any places yet</h3>
+            <p>Start with your first stay and it will show up here with edit and review summaries.</p>
+            <a href="/listings/new" class="btn-primary-wl" style="margin-top:1.5rem;">Create your first place</a>
+        </div>
+    <% } else { %>
+        <div class="dashboard-grid">
+            <% for (let listing of myListings) { %>
+                <article class="dashboard-card">
+                    <img src="<%= listing.image %>" alt="<%= listing.title %>" class="dashboard-card-image" />
+                    <div class="dashboard-card-body">
+                        <div class="dashboard-card-top">
+                            <div>
+                                <h3><%= listing.title %></h3>
+                                <p><i class="fa-solid fa-location-dot"></i> <%= listing.location %>, <%= listing.country %></p>
+                            </div>
+                            <span class="listing-pill"><%= listing.reviews.length %> review<%= listing.reviews.length === 1 ? "" : "s" %></span>
+                        </div>
+
+                        <p class="listing-description"><%= listing.description.slice(0, 120) %><%= listing.description.length > 120 ? "..." : "" %></p>
+
+                        <div class="dashboard-meta">
+                            <span>&#8377;<%= listing.price.toLocaleString("en-IN") %> / night</span>
+                            <span>Created <%= new Date(listing.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) %></span>
+                        </div>
+
+                        <div class="dashboard-actions">
+                            <a href="/listings/<%= listing._id %>" class="btn-outline-wl">
+                                <i class="fa-solid fa-eye"></i> View
+                            </a>
+                            <a href="/listings/<%= listing._id %>/edit" class="btn-primary-wl">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            <% } %>
+        </div>
+    <% } %>
+</section>

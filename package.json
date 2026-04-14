@@ -1,16 +1,24 @@
 {
   "name": "majorprojectapna",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "WanderLust listing and review app built with Express, EJS, MongoDB, and Passport.",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "dev": "node --watch app.js",
+    "check": "node --check app.js"
   },
-  "keywords": [],
+  "keywords": [
+    "express",
+    "mongodb",
+    "passport",
+    "ejs"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "connect-flash": "^0.1.1",
+    "dotenv": "^17.4.1",
     "ejs": "^3.1.10",
     "ejs-mate": "^4.0.0",
     "express": "^5.1.0",
@@ -18,8 +26,11 @@
     "joi": "^18.0.2",
     "method-override": "^3.0.0",
     "mongoose": "^9.0.0",
+    "nodemailer": "^8.0.5",
     "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "passport-local": "^1.0.0",
-    "passport-local-mongoose": "^9.0.1"
+    "passport-local-mongoose": "^9.0.1",
+    "twilio": "^5.13.1"
   }
 }

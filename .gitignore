@@ -1,0 +1,6 @@
+node_modules/
+.env
+*.log
+app_output*.txt
+coverage/
+.DS_Store

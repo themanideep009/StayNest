@@ -1,23 +1,18 @@
-<% if(success &&success.length){%>
-<div class="alert alert-success alert-dismissible fade show col-6 offset-3" role="alert">
-    <%=success%>
-    <button
-    type="button"
-    class="btn-close"
-    data-bs-dismiss="alert"
-    aria-label="Close"
-    ></button>
+<div class="flash-wrapper">
+    <% if (success && success.length) { %>
+        <% success.forEach((message) => { %>
+        <div class="flash-toast success">
+            <span class="flash-icon"><i class="fa-solid fa-circle-check"></i></span>
+            <span><%= message %></span>
+        </div>
+        <% }) %>
+    <% } %>
+    <% if (error && error.length) { %>
+        <% error.forEach((message) => { %>
+        <div class="flash-toast error">
+            <span class="flash-icon"><i class="fa-solid fa-circle-exclamation"></i></span>
+            <span><%= message %></span>
+        </div>
+        <% }) %>
+    <% } %>
 </div>
-<%}%> 
-
-<% if(error &&error.length){%>
-<div class="alert alert-danger alert-dismissible fade show col-6 offset-3" role="alert">
-    <%=error%>
-    <button
-    type="button"
-    class="btn-close"
-    data-bs-dismiss="alert"
-    aria-label="Close"
-    ></button>
-</div>
-<%}%> 
