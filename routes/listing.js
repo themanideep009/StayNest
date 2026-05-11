@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Listing = require("../models/listing.js");
+const Booking = require("../models/booking.js");
 const { isLoggedIn, isOwner, validateListing } = require("../utils/middleware.js");
 
 const featuredExperiences = [
@@ -222,6 +223,15 @@ router.post("/:id/book", isLoggedIn, async (req, res, next) => {
 
         const nights = Math.round((checkoutDate - checkinDate) / (1000 * 60 * 60 * 24));
         const total = nights * listing.price;
+        await Booking.create({
+            listing: listing._id,
+            guest: req.user._id,
+            checkin: checkinDate,
+            checkout: checkoutDate,
+            nights,
+            total,
+        });
+
         const formattedCheckin = checkinDate.toLocaleDateString("en-IN", {
             year: "numeric",
             month: "short",
@@ -237,9 +247,9 @@ router.post("/:id/book", isLoggedIn, async (req, res, next) => {
             "success",
             `Booking confirmed for ${listing.title}: ${formattedCheckin} to ${formattedCheckout} (${nights} night${
                 nights === 1 ? "" : "s"
-            }) for Rs. ${total.toLocaleString("en-IN")}.`
+            }) for Rs. ${total.toLocaleString("en-IN")}. You can see it in your dashboard.`
         );
-        return res.redirect(`/listings/${id}`);
+        return res.redirect("/dashboard");
     } catch (err) {
         next(err);
     }

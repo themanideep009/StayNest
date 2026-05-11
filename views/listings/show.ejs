@@ -40,6 +40,8 @@
     dayAfter.setDate(today.getDate() + 3);
     const toInputDate = (date) => date.toISOString().split("T")[0];
     const mapQuery = encodeURIComponent(locationLabel);
+    const galleryImages = (listing.images && listing.images.length ? listing.images : [listing.image]).slice(0, 3);
+    const coverImage = galleryImages[0] || listing.image;
 %>
 
 <section class="listing-show-shell">
@@ -63,8 +65,8 @@
         </div>
 
         <div class="show-actions-inline">
-            <a href="<%= listing.image %>" target="_blank" rel="noreferrer" class="btn-outline-wl">
-                <i class="fa-regular fa-image"></i> Show photo
+            <a href="<%= coverImage %>" target="_blank" rel="noreferrer" class="btn-outline-wl">
+                <i class="fa-regular fa-image"></i> Show photos
             </a>
             <a href="#booking" class="btn-outline-wl">
                 <i class="fa-regular fa-calendar"></i> Book dates
@@ -74,7 +76,7 @@
 
     <section class="show-gallery-panel" id="photos">
         <div class="show-gallery-main">
-            <img src="<%= listing.image %>" alt="<%= listing.title %>" />
+            <img src="<%= coverImage %>" alt="<%= listing.title %>" />
             <% if (avgRating && Number(avgRating) >= 4.7 && reviewCount >= 3) { %>
                 <div class="gallery-badge">
                     <i class="fa-solid fa-award"></i> Guest favourite
@@ -83,21 +85,11 @@
         </div>
 
         <div class="show-gallery-stack">
-            <article class="gallery-info-card">
-                <span class="eyebrow">Nightly rate</span>
-                <strong>&#8377;<%= listing.price.toLocaleString("en-IN") %></strong>
-                <p>Simple nightly pricing for this stay in <%= listing.location %>.</p>
-            </article>
-            <article class="gallery-info-card">
-                <span class="eyebrow">Rating</span>
-                <strong><%= avgRating || "New" %></strong>
-                <p><%= reviewCount ? `${reviewCount} guest review${reviewCount === 1 ? "" : "s"} so far.` : "This place is waiting for its first reviews." %></p>
-            </article>
-            <article class="gallery-info-card gallery-info-card-muted">
-                <span class="eyebrow">Location</span>
-                <strong><%= listing.country %></strong>
-                <p><%= listing.location %> is the base for this stay.</p>
-            </article>
+            <% for (let i = 1; i < galleryImages.length; i++) { %>
+                <a href="<%= galleryImages[i] %>" target="_blank" rel="noreferrer" class="gallery-thumb">
+                    <img src="<%= galleryImages[i] %>" alt="<%= listing.title %> photo <%= i + 1 %>" loading="lazy" />
+                </a>
+            <% } %>
         </div>
     </section>
 
@@ -118,7 +110,7 @@
                         <p class="show-intro-meta">
                             <span>Private stay</span>
                             <span>Curated location</span>
-                            <span><%= reviewCount ? `${reviewCount} guest review${reviewCount === 1 ? "" : "s"}` : "New on WanderLust" %></span>
+                            <span><%= reviewCount ? `${reviewCount} guest review${reviewCount === 1 ? "" : "s"}` : "New on Stayhub" %></span>
                         </p>
                     </div>
                 </div>

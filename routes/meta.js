@@ -2,12 +2,13 @@ const express = require("express");
 const router = express.Router();
 
 const Listing = require("../models/listing.js");
+const Booking = require("../models/booking.js");
 const { isLoggedIn } = require("../utils/middleware.js");
 
 const pages = {
     about: {
-        title: "About WanderLust",
-        lead: "WanderLust helps travelers discover memorable stays and gives hosts a simple way to share spaces they love.",
+        title: "About Stayhub",
+        lead: "Stayhub helps travelers discover memorable stays and gives hosts a simple way to share spaces they love.",
         sections: [
             {
                 heading: "What We Do",
@@ -15,13 +16,13 @@ const pages = {
             },
             {
                 heading: "Why It Matters",
-                body: "Travel planning works better when the experience feels human. WanderLust keeps the experience focused on clear listings, useful information, and trusted ownership-based actions.",
+                body: "Travel planning works better when the experience feels human. Stayhub keeps the experience focused on clear listings, useful information, and trusted ownership-based actions.",
             },
         ],
     },
     help: {
         title: "Help Center",
-        lead: "Everything you need to use WanderLust smoothly.",
+        lead: "Everything you need to use Stayhub smoothly.",
         sections: [
             {
                 heading: "Create an Account",
@@ -39,7 +40,7 @@ const pages = {
     },
     privacy: {
         title: "Privacy Policy",
-        lead: "WanderLust stores the information needed to run accounts, listings, and reviews.",
+        lead: "Stayhub stores the information needed to run accounts, listings, and reviews.",
         sections: [
             {
                 heading: "Data We Use",
@@ -53,7 +54,7 @@ const pages = {
     },
     terms: {
         title: "Terms of Use",
-        lead: "Using WanderLust means keeping listings and reviews respectful, accurate, and lawful.",
+        lead: "Using Stayhub means keeping listings and reviews respectful, accurate, and lawful.",
         sections: [
             {
                 heading: "Content Responsibility",
@@ -75,16 +76,26 @@ router.get("/dashboard", isLoggedIn, async (req, res, next) => {
                 populate: { path: "author" },
             })
             .sort({ createdAt: -1 });
+        const myBookings = await Booking.find({ guest: req.user._id })
+            .populate({
+                path: "listing",
+                populate: { path: "owner" },
+            })
+            .sort({ checkin: 1, createdAt: -1 });
 
         const totalReviews = myListings.reduce((sum, listing) => sum + listing.reviews.length, 0);
         const totalValue = myListings.reduce((sum, listing) => sum + listing.price, 0);
+        const totalBookingValue = myBookings.reduce((sum, booking) => sum + booking.total, 0);
 
         res.render("meta/dashboard", {
             myListings,
+            myBookings,
             stats: {
                 listingCount: myListings.length,
                 reviewCount: totalReviews,
                 averagePrice: myListings.length ? Math.round(totalValue / myListings.length) : 0,
+                bookingCount: myBookings.length,
+                bookingValue: totalBookingValue,
             },
         });
     } catch (err) {

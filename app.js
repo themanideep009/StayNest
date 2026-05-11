@@ -20,7 +20,7 @@ const { configurePassport } = require("./utils/passport.js");
 const app = express();
 
 const PORT = Number(process.env.PORT) || 3000;
-const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/wanderlust";
+const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/stayhub";
 const NODE_ENV = process.env.NODE_ENV || "development";
 const SESSION_SECRET = process.env.SESSION_SECRET || "dev-only-change-me";
 const APP_BASE_URL = process.env.APP_BASE_URL || `http://localhost:${PORT}`;

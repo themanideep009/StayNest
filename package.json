@@ -1,7 +1,7 @@
 {
-  "name": "majorprojectapna",
+  "name": "stayhub",
   "version": "1.0.0",
-  "description": "WanderLust listing and review app built with Express, EJS, MongoDB, and Passport.",
+  "description": "Stayhub listing and review app built with Express, EJS, MongoDB, and Passport.",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",

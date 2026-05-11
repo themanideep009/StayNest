@@ -161,7 +161,7 @@ router.post("/signup", validateUser, async (req, res, next) => {
 
         const newUser = new User({ email, username, authMethods: ["local"] });
         const registeredUser = await User.register(newUser, password);
-        return loginAndRedirect(req, res, next, registeredUser, "Welcome to WanderLust!");
+        return loginAndRedirect(req, res, next, registeredUser, "Welcome to Stayhub!");
     } catch (err) {
         req.flash("error", err.message);
         return res.redirect("/auth?mode=signup");
@@ -185,7 +185,7 @@ router.post(
             req.user.authMethods = [...new Set([...(req.user.authMethods || []), "local"])];
             await req.user.save();
         }
-        req.flash("success", "Welcome back to WanderLust!");
+        req.flash("success", "Welcome back to Stayhub!");
         const redirectUrl = res.locals.redirectUrl || "/listings";
         res.redirect(redirectUrl);
     }
@@ -446,7 +446,7 @@ router.post("/auth/phone/verify", async (req, res, next) => {
             user,
             purpose === "signup"
                 ? "Your phone number is verified and your account is ready."
-                : "Welcome back to WanderLust!"
+                : "Welcome back to Stayhub!"
         );
     } catch (err) {
         req.flash("error", err.message);

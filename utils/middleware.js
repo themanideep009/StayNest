@@ -66,6 +66,21 @@ module.exports.isReviewAuthor = async (req, res, next) => {
 // ─── Validation Middleware ────────────────────────────────────────────────────
 
 module.exports.validateListing = (req, res, next) => {
+    if (req.body.listing) {
+        const rawImages = Array.isArray(req.body.listing.images)
+            ? req.body.listing.images
+            : req.body.listing.images
+                ? [req.body.listing.images]
+                : [];
+        const images = [req.body.listing.image, ...rawImages]
+            .map((image) => String(image || "").trim())
+            .filter(Boolean)
+            .slice(0, 3);
+
+        req.body.listing.images = images;
+        req.body.listing.image = images[0] || req.body.listing.image;
+    }
+
     let { error } = listingSchema.validate(req.body);
     if (error) {
         let errMsg = error.details.map((el) => el.message).join(",");

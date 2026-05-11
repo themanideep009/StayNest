@@ -1,6 +1,6 @@
-# WanderLust
+# Stayhub
 
-WanderLust is a full-stack stay listing app built with Express, EJS, MongoDB, Mongoose, and Passport. Users can sign up, log in, create listings, edit their own listings, and leave reviews on stays.
+Stayhub is a full-stack stay listing app built with Express, EJS, MongoDB, Mongoose, and Passport. Users can sign up, log in, create listings, edit their own listings, and leave reviews on stays.
 
 ## What Improved
 
@@ -23,7 +23,7 @@ npm install
 2. Set environment variables:
 
 ```powershell
-$env:MONGO_URL="mongodb://127.0.0.1:27017/wanderlust"
+$env:MONGO_URL="mongodb://127.0.0.1:27017/stayhub"
 $env:SESSION_SECRET="replace-this-with-a-long-random-string"
 $env:PORT="3000"
 $env:APP_BASE_URL="http://localhost:3000"

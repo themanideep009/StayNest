@@ -1,10 +1,20 @@
 <% layout("/layouts/boilerplate") %>
+<%
+    const dashboardStats = {
+        listingCount: stats && typeof stats.listingCount === "number" ? stats.listingCount : 0,
+        reviewCount: stats && typeof stats.reviewCount === "number" ? stats.reviewCount : 0,
+        averagePrice: stats && typeof stats.averagePrice === "number" ? stats.averagePrice : 0,
+        bookingCount: stats && typeof stats.bookingCount === "number" ? stats.bookingCount : 0,
+        bookingValue: stats && typeof stats.bookingValue === "number" ? stats.bookingValue : 0,
+    };
+    const bookings = Array.isArray(myBookings) ? myBookings : [];
+%>
 
 <section class="dashboard-hero">
     <div>
         <span class="eyebrow">Dashboard</span>
         <h1>Welcome back, <%= currUser.username %>.</h1>
-        <p>Track your hosted places, review activity, and jump back into editing with one click.</p>
+        <p>Track your bookings, hosted places, review activity, and quick actions in one place.</p>
     </div>
     <a href="/listings/new" class="btn-primary-wl">
         <i class="fa-solid fa-plus"></i> Create place
@@ -14,16 +24,87 @@
 <section class="dashboard-stats">
     <div class="stat-card">
         <span>Your places</span>
-        <strong><%= stats.listingCount %></strong>
+        <strong><%= dashboardStats.listingCount %></strong>
     </div>
     <div class="stat-card">
         <span>Total reviews</span>
-        <strong><%= stats.reviewCount %></strong>
+        <strong><%= dashboardStats.reviewCount %></strong>
     </div>
     <div class="stat-card">
         <span>Average price</span>
-        <strong>&#8377;<%= stats.averagePrice.toLocaleString("en-IN") %></strong>
+        <strong>&#8377;<%= dashboardStats.averagePrice.toLocaleString("en-IN") %></strong>
     </div>
+    <div class="stat-card">
+        <span>Bookings</span>
+        <strong><%= dashboardStats.bookingCount %></strong>
+    </div>
+    <div class="stat-card">
+        <span>Trip spend</span>
+        <strong>&#8377;<%= dashboardStats.bookingValue.toLocaleString("en-IN") %></strong>
+    </div>
+</section>
+
+<section class="dashboard-panel">
+    <div class="page-header">
+        <div>
+            <span class="eyebrow">Your trips</span>
+            <h2>Bookings</h2>
+            <p class="section-subtle">Confirmed bookings appear here after you book a stay.</p>
+        </div>
+        <a href="/listings" class="btn-outline-wl">
+            <i class="fa-solid fa-magnifying-glass"></i> Browse more
+        </a>
+    </div>
+
+    <% if (bookings.length === 0) { %>
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fa-solid fa-calendar-check"></i></div>
+            <h3>No bookings yet</h3>
+            <p>Book a stay from any listing and your trip details will show up here.</p>
+            <a href="/listings" class="btn-primary-wl" style="margin-top:1.5rem;">Explore stays</a>
+        </div>
+    <% } else { %>
+        <div class="dashboard-grid">
+            <% for (let booking of bookings) { %>
+                <% if (booking.listing) { %>
+                    <article class="dashboard-card booking-dashboard-card">
+                        <img src="<%= booking.listing.image %>" alt="<%= booking.listing.title %>" class="dashboard-card-image" />
+                        <div class="dashboard-card-body">
+                            <div class="dashboard-card-top">
+                                <div>
+                                    <h3><%= booking.listing.title %></h3>
+                                    <p><i class="fa-solid fa-location-dot"></i> <%= booking.listing.location %>, <%= booking.listing.country %></p>
+                                </div>
+                                <span class="listing-pill"><%= booking.status %></span>
+                            </div>
+
+                            <div class="booking-dashboard-dates">
+                                <div>
+                                    <span>Check-in</span>
+                                    <strong><%= new Date(booking.checkin).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) %></strong>
+                                </div>
+                                <div>
+                                    <span>Checkout</span>
+                                    <strong><%= new Date(booking.checkout).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) %></strong>
+                                </div>
+                            </div>
+
+                            <div class="dashboard-meta">
+                                <span><%= booking.nights %> night<%= booking.nights === 1 ? "" : "s" %></span>
+                                <span>&#8377;<%= booking.total.toLocaleString("en-IN") %> total</span>
+                            </div>
+
+                            <div class="dashboard-actions">
+                                <a href="/listings/<%= booking.listing._id %>" class="btn-outline-wl">
+                                    <i class="fa-solid fa-eye"></i> View hotel
+                                </a>
+                            </div>
+                        </div>
+                    </article>
+                <% } %>
+            <% } %>
+        </div>
+    <% } %>
 </section>
 
 <section class="dashboard-panel">

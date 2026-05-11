@@ -171,9 +171,15 @@
     <% } else { %>
         <div class="listings-grid">
             <% for (let listing of alllistings) { %>
+                <% const cardImages = (listing.images && listing.images.length ? listing.images : [listing.image]).slice(0, 3); %>
                 <a href="/listings/<%= listing._id %>" class="listing-card">
-                    <div class="card-overflow">
-                        <img src="<%= listing.image %>" alt="<%= listing.title %>" loading="lazy" />
+                    <div class="listing-card-gallery listing-card-gallery-<%= cardImages.length %>">
+                        <img class="listing-card-cover" src="<%= cardImages[0] || listing.image %>" alt="<%= listing.title %>" loading="lazy" />
+                        <% if (cardImages.length > 1) { %>
+                            <% for (let i = 1; i < cardImages.length; i++) { %>
+                                <img class="listing-card-extra" src="<%= cardImages[i] %>" alt="<%= listing.title %> preview <%= i + 1 %>" loading="lazy" />
+                            <% } %>
+                        <% } %>
                     </div>
                     <div class="listing-card-body">
                         <div class="listing-card-topline">

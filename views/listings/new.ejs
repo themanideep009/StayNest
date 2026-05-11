@@ -64,13 +64,34 @@
         </div>
 
         <div class="wl-form-group">
-            <label for="image">Image URL <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+            <label for="image">Photo 1 URL <span style="color:var(--muted);font-weight:400;">(cover)</span></label>
                 <input
                     id="image"
                     name="listing[image]"
                     type="url"
                     placeholder="https://example.com/photo.jpg"
                 />
+        </div>
+
+        <div class="wl-form-row">
+            <div class="wl-form-group">
+                <label for="imageTwo">Photo 2 URL <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+                <input
+                    id="imageTwo"
+                    name="listing[images][]"
+                    type="url"
+                    placeholder="https://example.com/room.jpg"
+                />
+            </div>
+            <div class="wl-form-group">
+                <label for="imageThree">Photo 3 URL <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+                <input
+                    id="imageThree"
+                    name="listing[images][]"
+                    type="url"
+                    placeholder="https://example.com/view.jpg"
+                />
+            </div>
         </div>
 
         <div class="form-actions">

@@ -62,14 +62,39 @@
             />
         </div>
 
+        <%
+            const editImages = listing.images && listing.images.length ? listing.images : [listing.image];
+        %>
+
         <div class="wl-form-group">
-            <label for="image">Image URL</label>
+            <label for="image">Photo 1 URL <span style="color:var(--muted);font-weight:400;">(cover)</span></label>
             <input
                 id="image"
                 name="listing[image]"
                 type="url"
-                value="<%= listing.image %>"
+                value="<%= editImages[0] || listing.image %>"
             />
+        </div>
+
+        <div class="wl-form-row">
+            <div class="wl-form-group">
+                <label for="imageTwo">Photo 2 URL <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+                <input
+                    id="imageTwo"
+                    name="listing[images][]"
+                    type="url"
+                    value="<%= editImages[1] || "" %>"
+                />
+            </div>
+            <div class="wl-form-group">
+                <label for="imageThree">Photo 3 URL <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
+                <input
+                    id="imageThree"
+                    name="listing[images][]"
+                    type="url"
+                    value="<%= editImages[2] || "" %>"
+                />
+            </div>
         </div>
 
         <div class="form-actions">
