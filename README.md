@@ -1,6 +1,6 @@
 # Stayhub
 
-Stayhub is a full-stack stay listing app built with Express, EJS, MongoDB, Mongoose, and Passport. Users can sign up, log in, create listings, edit their own listings, and leave reviews on stays.
+Stayhub is a full-stack stay listing app built with Express, EJS, MongoDB, Mongoose, Passport, and JWT. Users can sign up, log in, create listings, edit their own listings, book stays, and leave reviews.
 
 ## What Improved
 
@@ -10,6 +10,9 @@ Stayhub is a full-stack stay listing app built with Express, EJS, MongoDB, Mongo
 - Redirect-after-login flow is cleaned up so old redirect URLs do not linger in session.
 - Listing, review, and signup payloads now have stronger server-side validation.
 - Listing creation redirects directly to the new listing page.
+- JWT API authentication was added for API clients.
+- A host onboarding page explains how to publish a stay on Stayhub.
+- Listing forms now support up to 5 photos.
 - Project scripts and ignore rules are cleaner for daily development.
 
 ## Getting Started
@@ -58,6 +61,9 @@ npm run dev
 - Google OAuth sign-in and sign-up
 - Phone-number OTP login and signup with Twilio Verify
 - Listing creation, editing, viewing, and deletion
+- Host onboarding flow with direct listing creation entry point
+- Listing galleries with up to 5 photos
+- Stay booking flow and user dashboard
 - Review creation and deletion
 - Ownership-based authorization for listings and reviews
 - Flash messages for success and error states
@@ -113,10 +119,23 @@ Existing protected actions that use `isLoggedIn` also accept a bearer token now,
 
 1. Add your SMTP credentials to `.env`.
 2. For Gmail, use:
-   `SMTP_HOST=smtp.gmail.com`
-   `SMTP_PORT=587`
-   `SMTP_SECURE=false`
-   `SMTP_USER=your-email@gmail.com`
-   `SMTP_PASS=your-app-password`
-   `EMAIL_FROM=your-email@gmail.com`
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+EMAIL_FROM=your-email@gmail.com
+```
+
 3. Restart the app after saving `.env`.
+
+## Useful Routes
+
+- `/listings`: browse all stays
+- `/listings/new`: create a new stay
+- `/host`: host onboarding page
+- `/dashboard`: user dashboard for listings and bookings
+- `/auth?mode=signup`: create an account
+- `/auth?mode=login`: log in
