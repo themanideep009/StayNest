@@ -14,8 +14,10 @@ const listings = require("./routes/listing.js");
 const reviews = require("./routes/review.js");
 const user = require("./routes/user.js");
 const meta = require("./routes/meta.js");
+const apiAuth = require("./routes/apiAuth.js");
 const { isGoogleAuthConfigured, isPhoneAuthConfigured } = require("./utils/auth.js");
 const { configurePassport } = require("./utils/passport.js");
+const { wantsJson } = require("./utils/jwt.js");
 
 const app = express();
 
@@ -33,6 +35,7 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.engine("ejs", ejsMate);
 
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
@@ -78,8 +81,17 @@ app.get("/", (req, res) => {
     res.redirect("/listings");
 });
 
+app.get("/places", (req, res) => {
+    res.redirect("/listings");
+});
+
+app.get(["/place", "/listing"], (req, res) => {
+    res.redirect("/listings");
+});
+
 app.use("/listings", listings);
 app.use("/listings/:id/reviews", reviews);
+app.use("/api/auth", apiAuth);
 app.use("/", user);
 app.use("/", meta);
 
@@ -93,6 +105,10 @@ app.use((err, req, res, next) => {
 
     if (err.statusCode >= 500) {
         console.error(err);
+    }
+
+    if (wantsJson(req)) {
+        return res.status(err.statusCode).json({ error: err.message });
     }
 
     res.status(err.statusCode).render("listings/error.ejs", { err });

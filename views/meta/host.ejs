@@ -1,0 +1,55 @@
+<% layout("/layouts/boilerplate") %>
+
+<section class="host-onboarding-shell">
+    <div class="host-onboarding-top">
+        <a href="/listings" class="host-exit-link">
+            <i class="fa-solid fa-xmark"></i>
+            Exit
+        </a>
+    </div>
+
+    <div class="host-onboarding-header">
+        <span class="eyebrow">Become a host</span>
+        <h1>It’s easy to get started on Stayhub</h1>
+    </div>
+
+    <div class="host-step-list">
+        <article class="host-step">
+            <span class="host-step-number">1</span>
+            <div>
+                <h2>Tell us about your place</h2>
+                <p>Share some basic info, such as where it is and how many guests can stay.</p>
+            </div>
+        </article>
+
+        <article class="host-step">
+            <span class="host-step-number">2</span>
+            <div>
+                <h2>Make it stand out</h2>
+                <p>Add 5 or more photos plus a title and description – we’ll help you out.</p>
+            </div>
+        </article>
+
+        <article class="host-step">
+            <span class="host-step-number">3</span>
+            <div>
+                <h2>Finish up and publish</h2>
+                <p>Choose a starting price, verify a few details, then publish your listing.</p>
+            </div>
+        </article>
+    </div>
+
+    <div class="host-onboarding-actions">
+        <% if (currUser) { %>
+            <a href="/listings/new" class="btn-primary-wl">
+                <i class="fa-solid fa-plus"></i>
+                Get started
+            </a>
+        <% } else { %>
+            <a href="/auth?mode=signup" class="btn-primary-wl">
+                <i class="fa-solid fa-user-plus"></i>
+                Get started
+            </a>
+        <% } %>
+    </div>
+</section>

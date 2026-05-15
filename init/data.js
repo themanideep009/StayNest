@@ -167,6 +167,118 @@ const sampleListings = [
     location: "Goa",
     country: "India",
   },
+  {
+    title: "Kerala Backwater Houseboat",
+    description:
+      "A private houseboat drifting through quiet Alleppey canals with a shaded deck, simple ensuite bedroom, fresh local meals, and wide views of coconut palms and village life along the water.",
+    image: "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1602216056096-3b40cc0c9944?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1200&q=80",
+    ],
+    price: 8900,
+    location: "Alleppey",
+    country: "India",
+  },
+  {
+    title: "Rishikesh Riverside Yoga Retreat",
+    description:
+      "A peaceful room near the Ganga with a shared yoga deck, mountain air, vegetarian breakfast, and easy access to cafes, suspension bridges, rafting points, and evening aarti by the river.",
+    image: "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1200&q=80",
+    ],
+    price: 5200,
+    location: "Rishikesh",
+    country: "India",
+  },
+  {
+    title: "Udaipur Lakeview Heritage Suite",
+    description:
+      "A character-filled suite with arched windows, carved furniture, and a terrace looking toward the lake. City Palace, boat rides, rooftop restaurants, and old-city lanes are all close by.",
+    image: "https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1599661046827-dacff0c0f09a?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1477587458883-47145ed94245?auto=format&fit=crop&w=1200&q=80",
+    ],
+    price: 6900,
+    location: "Udaipur",
+    country: "India",
+  },
+  {
+    title: "Manali Pinewood Cabin",
+    description:
+      "A cozy pine cabin above town with a balcony, heater, compact kitchen, and sweeping valley views. It is built for slow mornings, work-from-hills weeks, and easy drives to nearby trails.",
+    image: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1542718610-a1d656d1884c?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1518732714860-b62714ce0c59?auto=format&fit=crop&w=1200&q=80",
+    ],
+    price: 6100,
+    location: "Manali",
+    country: "India",
+  },
+  {
+    title: "Tokyo Micro Apartment in Shibuya",
+    description:
+      "A clever compact apartment with a foldaway desk, efficient kitchenette, washer, and quick train access. It is ideal for solo travelers who want a practical base near Shibuya energy.",
+    image: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80",
+    ],
+    price: 9800,
+    location: "Tokyo",
+    country: "Japan",
+  },
+  {
+    title: "Bali Rice Terrace Villa",
+    description:
+      "A calm villa near Ubud with a plunge pool, open-air lounge, breakfast patio, and green rice terrace views. It works well for couples, creative breaks, and relaxed scooter days.",
+    image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+    ],
+    price: 12600,
+    location: "Ubud",
+    country: "Indonesia",
+  },
+  {
+    title: "Paris Attic Studio near Montmartre",
+    description:
+      "A bright top-floor studio with sloped ceilings, a tiny writing desk, kitchenette, and neighborhood bakery downstairs. Montmartre streets, metro stops, and small wine bars are nearby.",
+    image: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80",
+    ],
+    price: 15400,
+    location: "Paris",
+    country: "France",
+  },
+  {
+    title: "Cape Town Ocean View Apartment",
+    description:
+      "A modern apartment with a balcony facing the Atlantic, secure parking, fast Wi-Fi, and easy access to Sea Point walks, beaches, cafes, and day trips toward Table Mountain.",
+    image: "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?auto=format&fit=crop&w=1200&q=80",
+    images: [
+      "https://images.unsplash.com/photo-1580060839134-75a5edca2e99?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=80",
+    ],
+    price: 11200,
+    location: "Cape Town",
+    country: "South Africa",
+  },
 ];
 
 module.exports = { data: sampleListings };

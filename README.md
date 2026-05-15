@@ -25,6 +25,8 @@ npm install
 ```powershell
 $env:MONGO_URL="mongodb://127.0.0.1:27017/stayhub"
 $env:SESSION_SECRET="replace-this-with-a-long-random-string"
+$env:JWT_SECRET="replace-this-with-another-long-random-string"
+$env:JWT_EXPIRES_IN="7d"
 $env:PORT="3000"
 $env:APP_BASE_URL="http://localhost:3000"
 ```
@@ -52,6 +54,7 @@ npm run dev
 ## Main Features
 
 - User signup, login, and logout with multiple authentication methods
+- JWT API login, signup, bearer-token authentication, and role-based authorization helpers
 - Google OAuth sign-in and sign-up
 - Phone-number OTP login and signup with Twilio Verify
 - Listing creation, editing, viewing, and deletion
@@ -63,6 +66,8 @@ npm run dev
 
 - `MONGO_URL`: MongoDB connection string
 - `SESSION_SECRET`: session signing secret
+- `JWT_SECRET`: JWT signing secret
+- `JWT_EXPIRES_IN`: JWT expiration time such as `7d`, `12h`, or `30m`
 - `PORT`: server port
 - `NODE_ENV`: set to `production` in production deployments
 - `APP_BASE_URL`: app origin used for OAuth callback generation
@@ -78,6 +83,17 @@ npm run dev
 - `SMTP_USER`: SMTP username
 - `SMTP_PASS`: SMTP password or app password
 - `EMAIL_FROM`: sender email address shown in reset emails
+
+## JWT API
+
+JWT auth is available alongside the existing browser session auth.
+
+- `POST /api/auth/signup` with `username`, `email`, and `password` creates a user and returns a bearer token.
+- `POST /api/auth/login` with `username` and `password` returns a bearer token.
+- `GET /api/auth/me` returns the current user when called with `Authorization: Bearer <token>`.
+- `GET /api/auth/admin` is an example protected route that requires the user role to be `admin`.
+
+Existing protected actions that use `isLoggedIn` also accept a bearer token now, so API clients can authenticate without a session cookie.
 
 ## Provider Setup
 

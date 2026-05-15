@@ -21,7 +21,7 @@ const listingSchema = new Schema(
         images: {
             type: [String],
             default: [],
-            set: (values) => Array.isArray(values) ? values.filter(Boolean).slice(0, 3) : [],
+            set: (values) => Array.isArray(values) ? values.filter(Boolean).slice(0, 5) : [],
         },
         price: { type: Number, required: true },
         location: { type: String, required: true },
@@ -41,8 +41,8 @@ const listingSchema = new Schema(
 );
 
 listingSchema.pre("validate", function (next) {
-    if (this.images.length > 3) {
-        this.images = this.images.slice(0, 3);
+    if (this.images.length > 5) {
+        this.images = this.images.slice(0, 5);
     }
 
     if (!this.image && this.images.length > 0) {

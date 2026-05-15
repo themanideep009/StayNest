@@ -103,6 +103,10 @@ router.get("/dashboard", isLoggedIn, async (req, res, next) => {
     }
 });
 
+router.get("/host", (req, res) => {
+    res.render("meta/host");
+});
+
 for (const slug of Object.keys(pages)) {
     router.get(`/${slug}`, (req, res) => {
         res.render("meta/info", { page: pages[slug], slug });

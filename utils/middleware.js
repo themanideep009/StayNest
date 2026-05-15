@@ -2,11 +2,31 @@ const ExpressError = require("./ExpressError.js");
 const { listingSchema, reviewSchema, userSchema } = require("../schema.js");
 const Listing = require("../models/listing.js");
 const Review = require("../models/review.js");
+const { authenticateJwtFromHeader, wantsJson } = require("./jwt.js");
 
 // ─── Auth Guards ─────────────────────────────────────────────────────────────
 
-module.exports.isLoggedIn = (req, res, next) => {
+module.exports.isLoggedIn = async (req, res, next) => {
+    try {
+        if (req.isAuthenticated()) {
+            return next();
+        }
+
+        const jwtUser = await authenticateJwtFromHeader(req);
+        if (jwtUser) {
+            return next();
+        }
+    } catch (err) {
+        if (wantsJson(req)) {
+            return res.status(401).json({ error: "Invalid or expired token." });
+        }
+    }
+
     if (!req.isAuthenticated()) {
+        if (wantsJson(req)) {
+            return res.status(401).json({ error: "Authentication required." });
+        }
+
         if (req.method === "GET") {
             req.session.redirectUrl = req.originalUrl;
         } else if (req.get("referer")) {
@@ -19,7 +39,8 @@ module.exports.isLoggedIn = (req, res, next) => {
         req.flash("error", "You must be logged in to do that!");
         return res.redirect("/login");
     }
-    next();
+
+    return next();
 };
 
 module.exports.saveRedirectUrl = (req, res, next) => {
@@ -75,7 +96,7 @@ module.exports.validateListing = (req, res, next) => {
         const images = [req.body.listing.image, ...rawImages]
             .map((image) => String(image || "").trim())
             .filter(Boolean)
-            .slice(0, 3);
+            .slice(0, 5);
 
         req.body.listing.images = images;
         req.body.listing.image = images[0] || req.body.listing.image;

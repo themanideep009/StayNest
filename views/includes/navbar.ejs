@@ -12,6 +12,7 @@
         <li><a href="/listings" class="<%= currentPath === '/listings' ? 'active' : '' %>"><i class="fa-solid fa-compass" style="margin-right:5px;opacity:0.6;"></i>Explore</a></li>
         <li><a href="/about" class="<%= currentPath === '/about' ? 'active' : '' %>">About</a></li>
         <li><a href="/help" class="<%= currentPath === '/help' ? 'active' : '' %>">Help</a></li>
+        <li><a href="/host" class="btn-nav-host <%= currentPath === '/host' ? 'active' : '' %>"><i class="fa-solid fa-house-user"></i> Become a host</a></li>
 
         <% if (currUser) { %>
             <li><a href="/dashboard" class="<%= currentPath === '/dashboard' ? 'active' : '' %>">Dashboard</a></li>

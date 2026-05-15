@@ -9,7 +9,7 @@ module.exports.listingSchema = Joi.object({
         country: Joi.string().trim().min(2).max(80).required(),
         price: Joi.number().required().min(0),
         image: Joi.string().trim().uri().allow("", null),
-        images: Joi.array().items(Joi.string().trim().uri()).max(3),
+        images: Joi.array().items(Joi.string().trim().uri()).max(5),
     }).required(),
 });
 

@@ -40,7 +40,7 @@
     dayAfter.setDate(today.getDate() + 3);
     const toInputDate = (date) => date.toISOString().split("T")[0];
     const mapQuery = encodeURIComponent(locationLabel);
-    const galleryImages = (listing.images && listing.images.length ? listing.images : [listing.image]).slice(0, 3);
+    const galleryImages = (listing.images && listing.images.length ? listing.images : [listing.image]).slice(0, 5);
     const coverImage = galleryImages[0] || listing.image;
 %>
 

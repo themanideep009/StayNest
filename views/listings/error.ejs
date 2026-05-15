@@ -5,8 +5,10 @@
         <div class="error-code"><%= err.statusCode || 500 %></div>
         <div class="error-message"><%= err.message || "Something went wrong" %></div>
         <div class="error-sub">Oops! The page you're looking for doesn't exist or something broke.</div>
-        <a href="/listings" class="btn-primary-wl" style="margin:auto;display:inline-flex;">
-            <i class="fa-solid fa-arrow-left"></i> Back to Places
-        </a>
+        <div class="error-actions">
+            <a href="/listings" class="btn-primary-wl">
+                <i class="fa-solid fa-arrow-left"></i> Back to Places
+            </a>
+        </div>
     </div>
 </div>
