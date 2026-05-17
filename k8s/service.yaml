@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: stayhub-svc
+  namespace: stayhub
+  labels:
+    app: stayhub
+spec:
+  type: ClusterIP          # Ingress handles external traffic; keep this internal
+  selector:
+    app: stayhub
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 3000
