@@ -7,8 +7,8 @@ const { isLoggedIn } = require("../utils/middleware.js");
 
 const pages = {
     about: {
-        title: "About Stayhub",
-        lead: "Stayhub helps travelers discover memorable stays and gives hosts a simple way to share spaces they love.",
+        title: "About StayNest",
+        lead: "StayNest helps travelers discover memorable stays and gives hosts a simple way to share spaces they love.",
         sections: [
             {
                 heading: "What We Do",
@@ -16,13 +16,13 @@ const pages = {
             },
             {
                 heading: "Why It Matters",
-                body: "Travel planning works better when the experience feels human. Stayhub keeps the experience focused on clear listings, useful information, and trusted ownership-based actions.",
+                body: "Travel planning works better when the experience feels human. StayNest keeps the experience focused on clear listings, useful information, and trusted ownership-based actions.",
             },
         ],
     },
     help: {
         title: "Help Center",
-        lead: "Everything you need to use Stayhub smoothly.",
+        lead: "Everything you need to use StayNest smoothly.",
         sections: [
             {
                 heading: "Create an Account",
@@ -40,7 +40,7 @@ const pages = {
     },
     privacy: {
         title: "Privacy Policy",
-        lead: "Stayhub stores the information needed to run accounts, listings, and reviews.",
+        lead: "StayNest stores the information needed to run accounts, listings, and reviews.",
         sections: [
             {
                 heading: "Data We Use",
@@ -54,7 +54,7 @@ const pages = {
     },
     terms: {
         title: "Terms of Use",
-        lead: "Using Stayhub means keeping listings and reviews respectful, accurate, and lawful.",
+        lead: "Using StayNest means keeping listings and reviews respectful, accurate, and lawful.",
         sections: [
             {
                 heading: "Content Responsibility",

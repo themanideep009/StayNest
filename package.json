@@ -1,7 +1,7 @@
 {
-  "name": "stayhub",
+  "name": "staynest",
   "version": "1.0.0",
-  "description": "Stayhub listing and review app built with Express, EJS, MongoDB, and Passport.",
+  "description": "StayNest listing and review app built with Express, EJS, MongoDB, and Passport.",
   "main": "app.js",
   "scripts": {
     "start": "node app.js",

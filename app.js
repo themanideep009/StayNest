@@ -22,7 +22,7 @@ const { wantsJson } = require("./utils/jwt.js");
 const app = express();
 
 const PORT = Number(process.env.PORT) || 3000;
-const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/stayhub";
+const MONGO_URL = process.env.MONGO_URL || "mongodb://127.0.0.1:27017/staynest";
 const NODE_ENV = process.env.NODE_ENV || "development";
 const SESSION_SECRET = process.env.SESSION_SECRET || "dev-only-change-me";
 const APP_BASE_URL = process.env.APP_BASE_URL || `http://localhost:${PORT}`;
@@ -87,6 +87,13 @@ app.get("/places", (req, res) => {
 
 app.get(["/place", "/listing"], (req, res) => {
     res.redirect("/listings");
+});
+
+app.get("/healthz", (req, res) => {
+    res.status(200).json({
+        status: "ok",
+        service: "staynest",
+    });
 });
 
 app.use("/listings", listings);

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: staynest
+  namespace: staynest
+  labels:
+    app: staynest
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: staynest
+  template:
+    metadata:
+      labels:
+        app: staynest
+    spec:
+      containers:
+        - name: staynest
+          image: your-dockerhub-username/staynest:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: staynest-config
+            - secretRef:
+                name: staynest-secret
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

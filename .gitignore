@@ -4,3 +4,4 @@ node_modules/
 app_output*.txt
 coverage/
 .DS_Store
+k8s/02-secret.yaml
