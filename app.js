@@ -18,6 +18,7 @@ const apiAuth = require("./routes/apiAuth.js");
 const { isGoogleAuthConfigured, isPhoneAuthConfigured } = require("./utils/auth.js");
 const { configurePassport } = require("./utils/passport.js");
 const { wantsJson } = require("./utils/jwt.js");
+const { seedListingsIfEmpty } = require("./init/index.js");
 
 const app = express();
 
@@ -129,6 +130,7 @@ async function connectDB() {
 async function startServer() {
     try {
         await connectDB();
+        await seedListingsIfEmpty();
         app.listen(PORT, () => {
             console.log(`Server running at http://localhost:${PORT}`);
         });

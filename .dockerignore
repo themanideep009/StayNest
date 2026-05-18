@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 node_modules
 npm-debug.log
 .git
@@ -6,3 +7,29 @@ npm-debug.log
 app_output*.txt
 run*.log
 smoke*.log
+=======
+# Git
+.git
+.gitignore
+
+# Node
+node_modules
+npm-debug.log*
+
+# Environment files (never bake secrets into the image)
+.env
+.env.*
+!.env.example
+
+# Dev / docs
+README.md
+*.md
+
+# CI / DevOps source files (not needed inside the container)
+Jenkinsfile
+k8s/
+
+# OS artefacts
+.DS_Store
+Thumbs.db
+>>>>>>> 8b1bb6126931a75f78a495c20b136b676ba4a952

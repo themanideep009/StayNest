@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: staynest-config
+  namespace: staynest
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  JWT_EXPIRES_IN: "7d"
+  APP_BASE_URL: "https://staynest.yourdomain.com"   # ← update to your domain
+  GOOGLE_CALLBACK_URL: "https://staynest.yourdomain.com/auth/google/callback"
+  SMTP_HOST: "smtp.yourmailprovider.com"            # ← update
+  SMTP_PORT: "587"
+  SMTP_SECURE: "false"
+  EMAIL_FROM: "no-reply@yourdomain.com"             # ← update

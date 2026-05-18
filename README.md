@@ -1,6 +1,6 @@
 # StayNest
 
-StayNest is a full-stack stay listing app built with Express, EJS, MongoDB, Mongoose, Passport, and JWT. Users can sign up, log in, create listings, edit their own listings, book stays, and leave reviews.
+Stayhub is a full-stack stay listing app built with Express, EJS, MongoDB, Mongoose, and Passport. Users can sign up, log in, create listings, edit their own listings, and leave reviews on stays.
 
 ## What Improved
 
@@ -10,9 +10,6 @@ StayNest is a full-stack stay listing app built with Express, EJS, MongoDB, Mong
 - Redirect-after-login flow is cleaned up so old redirect URLs do not linger in session.
 - Listing, review, and signup payloads now have stronger server-side validation.
 - Listing creation redirects directly to the new listing page.
-- JWT API authentication was added for API clients.
-- A host onboarding page explains how to publish a stay on StayNest.
-- Listing forms now support up to 5 photos.
 - Project scripts and ignore rules are cleaner for daily development.
 
 ## Getting Started

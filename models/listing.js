@@ -40,7 +40,7 @@ const listingSchema = new Schema(
     { timestamps: true }
 );
 
-listingSchema.pre("validate", function (next) {
+listingSchema.pre("validate", function () {
     if (this.images.length > 5) {
         this.images = this.images.slice(0, 5);
     }
@@ -52,8 +52,6 @@ listingSchema.pre("validate", function (next) {
     if (this.image && this.images.length === 0) {
         this.images = [this.image];
     }
-
-    next();
 });
 
 // Cascade delete reviews when listing is deleted

@@ -1,0 +1,124 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: staynest-app
+  namespace: staynest
+  labels:
+    app: staynest
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: staynest
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0        # zero-downtime deploys
+  template:
+    metadata:
+      labels:
+        app: staynest
+    spec:
+      # ── Security context ────────────────────────────────────────────────────
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+
+      # ── Containers ──────────────────────────────────────────────────────────
+      containers:
+        - name: staynest
+          # Jenkins replaces IMAGE_PLACEHOLDER with the real ECR image tag
+          image: IMAGE_PLACEHOLDER
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              protocol: TCP
+
+          # ── Non-secret env from ConfigMap ──────────────────────────────────
+          envFrom:
+            - configMapRef:
+                name: staynest-config
+
+          # ── Secret env vars ────────────────────────────────────────────────
+          env:
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: staynest-secret
+                  key: SESSION_SECRET
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: staynest-secret
+                  key: JWT_SECRET
+            - name: MONGO_URL
+              valueFrom:
+                secretKeyRef:
+                  name: staynest-secret
+                  key: MONGO_URL
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: staynest-secret
+                  key: GOOGLE_CLIENT_ID
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: staynest-secret
+                  key: GOOGLE_CLIENT_SECRET
+            - name: TWILIO_ACCOUNT_SID
+              valueFrom:
+                secretKeyRef:
+                  name: staynest-secret
+                  key: TWILIO_ACCOUNT_SID
+            - name: TWILIO_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: staynest-secret
+                  key: TWILIO_AUTH_TOKEN
+            - name: TWILIO_VERIFY_SERVICE_SID
+              valueFrom:
+                secretKeyRef:
+                  name: staynest-secret
+                  key: TWILIO_VERIFY_SERVICE_SID
+            - name: SMTP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: staynest-secret
+                  key: SMTP_USER
+            - name: SMTP_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: staynest-secret
+                  key: SMTP_PASS
+
+          # ── Resource limits ────────────────────────────────────────────────
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+          # ── Probes ─────────────────────────────────────────────────────────
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            failureThreshold: 3
+
+      # ── Graceful termination ─────────────────────────────────────────────────
+      terminationGracePeriodSeconds: 30
