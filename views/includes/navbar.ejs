@@ -1,6 +1,6 @@
 <nav class="wl-navbar">
     <a href="/listings" class="wl-brand">
-        <img src="/images/staynest-logo-mark.png" alt="StayNest" class="brand-logo-full" />
+        <img src="/images/staynest-logo-small.svg" alt="StayNest" class="brand-logo-full" width="28" height="28" style="display:block;" />
     </a>
 
     <button class="wl-hamburger" id="navToggle" aria-label="Toggle navigation">
@@ -15,7 +15,6 @@
 
         <% if (currUser) { %>
             <li><a href="/dashboard" class="<%= currentPath === '/dashboard' ? 'active' : '' %>">Dashboard</a></li>
-            <li><a href="/listings/new"><i class="fa-solid fa-plus" style="margin-right:5px;opacity:0.6;"></i>Add Place</a></li>
             <li>
                 <a href="/logout" class="btn-nav-primary" style="display:inline-flex;align-items:center;gap:6px;">
                     <i class="fa-solid fa-right-from-bracket"></i> Logout

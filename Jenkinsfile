@@ -1,203 +1,146 @@
-<<<<<<< HEAD
 pipeline {
     agent any
 
     environment {
-        APP_NAME = 'staynest'
-        IMAGE_REPO = 'your-dockerhub-username/staynest'
-        IMAGE_TAG = "${env.BUILD_NUMBER}"
-        K8S_NAMESPACE = 'staynest'
+        REGISTRY = credentials('docker-registry-url')
+        REGISTRY_CREDENTIALS = credentials('docker-registry-credentials')
+        IMAGE_NAME = "${REGISTRY}/staynest"
+        IMAGE_TAG = "${BUILD_NUMBER}"
+        KUBE_CONFIG = credentials('kubeconfig-staynest')
+        KUBECONFIG = '/tmp/kubeconfig'
     }
 
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
-            }
-        }
-
-        stage('Install') {
-            steps {
-                sh 'npm ci'
-            }
-        }
-
-        stage('Validate') {
-            steps {
-                sh 'npm run check'
-            }
-        }
-
-        stage('Build Image') {
-            steps {
-                sh 'docker build -t $IMAGE_REPO:$IMAGE_TAG -t $IMAGE_REPO:latest .'
-            }
-        }
-
-        stage('Push Image') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
-                    sh 'docker push $IMAGE_REPO:$IMAGE_TAG'
-                    sh 'docker push $IMAGE_REPO:latest'
-=======
-// ─────────────────────────────────────────────────────────────────────────────
-//  Stayhub — CI/CD Pipeline
-//  Stages:
-//    1. Checkout
-//    2. Install & Lint
-//    3. Docker Build
-//    4. Docker Push  → ECR
-//    5. Deploy       → EKS (kubectl apply)
-// ─────────────────────────────────────────────────────────────────────────────
-
-pipeline {
-    agent any
-
-    // ── Tool versions (configure these in Jenkins Global Tool Configuration) ──
-    tools {
-        nodejs 'node-20'   // NodeJS installation named "node-20" in Jenkins
-    }
-
-    // ── Pipeline-wide environment ─────────────────────────────────────────────
-    environment {
-        // AWS settings — store these as Jenkins credentials / env vars
-        AWS_REGION        = 'us-east-1'
-        AWS_ACCOUNT_ID    = credentials('AWS_ACCOUNT_ID')          // Jenkins secret text
-        ECR_REPO          = 'stayhub'
-        IMAGE_TAG         = "${env.BUILD_NUMBER}"
-        ECR_REGISTRY      = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-        FULL_IMAGE        = "${ECR_REGISTRY}/${ECR_REPO}:${IMAGE_TAG}"
-        LATEST_IMAGE      = "${ECR_REGISTRY}/${ECR_REPO}:latest"
-
-        // EKS cluster name
-        EKS_CLUSTER_NAME  = 'stayhub-cluster'
-
-        // Kubernetes namespace
-        K8S_NAMESPACE     = 'stayhub'
-    }
-
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '10'))
-        timeout(time: 30, unit: 'MINUTES')
-        disableConcurrentBuilds()
-    }
-
-    stages {
-
-        // ── 1. Checkout ───────────────────────────────────────────────────────
-        stage('Checkout') {
-            steps {
-                checkout scm
-                echo "Building commit: ${env.GIT_COMMIT}"
-            }
-        }
-
-        // ── 2. Install & Syntax Check ─────────────────────────────────────────
-        stage('Install & Check') {
-            steps {
-                sh 'node --version'
-                sh 'npm ci --omit=dev'
-                sh 'node --check app.js'
-            }
-        }
-
-        // ── 3. Docker Build ───────────────────────────────────────────────────
-        stage('Docker Build') {
-            steps {
-                sh """
-                    docker build \
-                        --tag ${FULL_IMAGE} \
-                        --tag ${LATEST_IMAGE} \
-                        --label git-commit=${env.GIT_COMMIT} \
-                        .
-                """
-            }
-        }
-
-        // ── 4. Push to ECR ────────────────────────────────────────────────────
-        stage('Push to ECR') {
-            steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-ecr-credentials'   // Jenkins AWS credential ID
-                ]]) {
-                    sh """
-                        aws ecr get-login-password --region ${AWS_REGION} \
-                            | docker login --username AWS --password-stdin ${ECR_REGISTRY}
-
-                        docker push ${FULL_IMAGE}
-                        docker push ${LATEST_IMAGE}
-                    """
->>>>>>> 8b1bb6126931a75f78a495c20b136b676ba4a952
+                script {
+                    echo "✓ Code checked out successfully"
                 }
             }
         }
 
-<<<<<<< HEAD
-        stage('Deploy to Kubernetes') {
+        stage('Install Dependencies') {
             steps {
-                withCredentials([file(credentialsId: 'kubeconfig-staynest', variable: 'KUBECONFIG_FILE')]) {
-                    sh 'KUBECONFIG=$KUBECONFIG_FILE kubectl apply -f k8s/'
-                    sh 'KUBECONFIG=$KUBECONFIG_FILE kubectl -n $K8S_NAMESPACE set image deployment/$APP_NAME $APP_NAME=$IMAGE_REPO:$IMAGE_TAG'
-                    sh 'KUBECONFIG=$KUBECONFIG_FILE kubectl -n $K8S_NAMESPACE rollout status deployment/$APP_NAME'
-=======
-        // ── 5. Deploy to EKS ──────────────────────────────────────────────────
-        stage('Deploy to EKS') {
-            when {
-                // Only deploy from main / master branch
-                anyOf {
-                    branch 'main'
-                    branch 'master'
+                script {
+                    sh '''
+                        echo "Installing npm dependencies..."
+                        npm install
+                        echo "✓ Dependencies installed"
+                    '''
                 }
             }
+        }
+
+        stage('Lint & Syntax Check') {
             steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-ecr-credentials'
-                ]]) {
-                    sh """
-                        # Update kubeconfig for EKS
-                        aws eks update-kubeconfig \
-                            --region ${AWS_REGION} \
-                            --name ${EKS_CLUSTER_NAME}
+                script {
+                    sh '''
+                        echo "Running syntax check..."
+                        node --check app.js
+                        node --check init/index.js
+                        echo "✓ Syntax check passed"
+                    '''
+                }
+            }
+        }
 
-                        # Substitute the image tag in the deployment manifest and apply
-                        sed 's|IMAGE_PLACEHOLDER|${FULL_IMAGE}|g' k8s/deployment.yaml \
-                            | kubectl apply -f - -n ${K8S_NAMESPACE}
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh '''
+                        echo "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
+                        docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                        docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+                        echo "✓ Docker image built successfully"
+                    '''
+                }
+            }
+        }
 
-                        # Apply the rest of the manifests
-                        kubectl apply -f k8s/service.yaml        -n ${K8S_NAMESPACE}
-                        kubectl apply -f k8s/ingress.yaml        -n ${K8S_NAMESPACE}
-                        kubectl apply -f k8s/hpa.yaml            -n ${K8S_NAMESPACE}
+        stage('Push to Registry') {
+            steps {
+                script {
+                    sh '''
+                        echo "Logging into Docker registry..."
+                        echo "${REGISTRY_CREDENTIALS_PSW}" | docker login -u "${REGISTRY_CREDENTIALS_USR}" --password-stdin ${REGISTRY}
+                        
+                        echo "Pushing image: ${IMAGE_NAME}:${IMAGE_TAG}"
+                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${IMAGE_NAME}:latest
+                        
+                        echo "✓ Image pushed to registry"
+                        docker logout ${REGISTRY}
+                    '''
+                }
+            }
+        }
 
-                        # Wait for rollout to complete
-                        kubectl rollout status deployment/stayhub-app \
-                            -n ${K8S_NAMESPACE} --timeout=120s
-                    """
->>>>>>> 8b1bb6126931a75f78a495c20b136b676ba4a952
+        stage('Update Deployment') {
+            steps {
+                script {
+                    sh '''
+                        echo "Configuring kubectl with kubeconfig..."
+                        cp ${KUBE_CONFIG} ${KUBECONFIG}
+                        chmod 600 ${KUBECONFIG}
+                        
+                        echo "Updating deployment with new image..."
+                        kubectl set image deployment/staynest staynest=${IMAGE_NAME}:${IMAGE_TAG} \
+                            -n staynest \
+                            --kubeconfig=${KUBECONFIG}
+                        
+                        echo "Waiting for rollout to complete..."
+                        kubectl rollout status deployment/staynest -n staynest \
+                            --kubeconfig=${KUBECONFIG} \
+                            --timeout=5m
+                        
+                        echo "✓ Deployment updated successfully"
+                    '''
+                }
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                script {
+                    sh '''
+                        echo "Running health check..."
+                        kubectl get pods -n staynest --kubeconfig=${KUBECONFIG}
+                        
+                        READY=$(kubectl get deployment staynest -n staynest \
+                            -o jsonpath='{.status.conditions[?(@.type=="Available")].status}' \
+                            --kubeconfig=${KUBECONFIG})
+                        
+                        if [ "${READY}" = "True" ]; then
+                            echo "✓ All pods are healthy"
+                        else
+                            echo "! Health check: Some pods may not be ready"
+                        fi
+                    '''
                 }
             }
         }
     }
-<<<<<<< HEAD
-=======
 
-    // ── Post actions ──────────────────────────────────────────────────────────
     post {
         always {
-            // Clean up local Docker images to save disk space on the agent
-            sh """
-                docker rmi ${FULL_IMAGE}   || true
-                docker rmi ${LATEST_IMAGE} || true
-            """
+            script {
+                sh '''
+                    echo "Cleaning up temporary files..."
+                    rm -f ${KUBECONFIG} 2>/dev/null || true
+                    docker logout ${REGISTRY} 2>/dev/null || true
+                '''
+            }
         }
+
         success {
-            echo "Pipeline succeeded — image ${FULL_IMAGE} deployed to EKS."
+            echo "✓ Pipeline completed successfully!"
+            echo "Build #${BUILD_NUMBER} deployed to production"
         }
+
         failure {
-            echo "Pipeline failed. Check the logs above."
+            echo "✗ Pipeline failed. Check logs for details."
+            echo "Build #${BUILD_NUMBER} encountered an error"
         }
     }
->>>>>>> 8b1bb6126931a75f78a495c20b136b676ba4a952
 }

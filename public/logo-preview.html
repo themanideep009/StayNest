@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StayNest Logo Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+        
+        h1 {
+            color: #FF9F3D;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        .preview-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .preview-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 32px rgba(255, 159, 61, 0.2);
+        }
+        
+        .preview-card h3 {
+            color: #FF9F3D;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        .preview-card p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        .logo-container {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 180px;
+        }
+        
+        .logo-container img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        .size-32 { width: 32px; }
+        .size-48 { width: 48px; }
+        .size-64 { width: 64px; }
+        .size-128 { width: 128px; }
+        .size-200 { width: 200px; }
+        .size-300 { width: 300px; }
+        
+        .color-info {
+            background: #f0f0f0;
+            border-left: 4px solid #FFB366;
+            padding: 15px;
+            text-align: left;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        
+        .color-info p {
+            margin: 5px 0;
+            font-size: 13px;
+        }
+        
+        .color-swatch {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 StayNest Logo - Light Orange Edition</h1>
+    
+    <div class="preview-grid">
+        <!-- Favicon Size -->
+        <div class="preview-card">
+            <h3>Favicon (32px)</h3>
+            <p>Perfect for browser tabs and bookmarks</p>
+            <div class="logo-container">
+                <img src="/images/staynest-logo-small.svg" alt="StayNest" class="size-32" />
+            </div>
+            <code>width: 32px</code>
+        </div>
+        
+        <!-- Small Icon -->
+        <div class="preview-card">
+            <h3>Small Icon (48px)</h3>
+            <p>For navbars, buttons, and UI elements</p>
+            <div class="logo-container">
+                <img src="/images/staynest-logo-small.svg" alt="StayNest" class="size-48" />
+            </div>
+            <code>width: 48px</code>
+        </div>
+        
+        <!-- Medium Icon -->
+        <div class="preview-card">
+            <h3>Medium Icon (64px)</h3>
+            <p>For card headers and badges</p>
+            <div class="logo-container">
+                <img src="/images/staynest-logo-small.svg" alt="StayNest" class="size-64" />
+            </div>
+            <code>width: 64px</code>
+        </div>
+        
+        <!-- Compact Logo -->
+        <div class="preview-card">
+            <h3>Compact Logo (128px)</h3>
+            <p>For footer and sidebar branding</p>
+            <div class="logo-container">
+                <img src="/images/staynest-logo.svg" alt="StayNest" class="size-128" />
+            </div>
+            <code>width: 128px</code>
+        </div>
+        
+        <!-- Large Logo -->
+        <div class="preview-card">
+            <h3>Large Logo (200px)</h3>
+            <p>For hero sections and main branding</p>
+            <div class="logo-container">
+                <img src="/images/staynest-logo.svg" alt="StayNest" class="size-200" />
+            </div>
+            <code>width: 200px</code>
+        </div>
+        
+        <!-- Full Logo -->
+        <div class="preview-card">
+            <h3>Full Logo (300px)</h3>
+            <p>For promotional and marketing materials</p>
+            <div class="logo-container">
+                <img src="/images/staynest-logo.svg" alt="StayNest" class="size-300" />
+            </div>
+            <code>width: 300px</code>
+        </div>
+        
+        <!-- Color Info -->
+        <div class="preview-card">
+            <h3>Color Palette</h3>
+            <p>Official StayNest colors in light orange</p>
+            <div class="color-info">
+                <p><span class="color-swatch" style="background: #FFB366;"></span> Primary: #FFB366</p>
+                <p><span class="color-swatch" style="background: #FF9F3D;"></span> Secondary: #FF9F3D</p>
+                <p><span class="color-swatch" style="background: #E67E22;"></span> Border: #E67E22</p>
+                <p><span class="color-swatch" style="background: #FFCC99;"></span> Accent: #FFCC99</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>✓ All logos are scalable SVG format</p>
+        <p>✓ Perfect quality at any size</p>
+        <p>✓ Ready for web, print, and mobile</p>
+    </div>
+</body>
+</html>

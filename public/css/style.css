@@ -88,7 +88,7 @@ img {
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    padding: 18px min(32px, 4vw);
+    padding: 10px min(32px, 4vw);
     backdrop-filter: blur(16px);
     background: rgba(251, 247, 241, 0.86);
     border-bottom: 1px solid rgba(89, 64, 39, 0.08);
@@ -97,8 +97,8 @@ img {
 .wl-brand {
     display: inline-flex;
     align-items: center;
-    width: 64px;
-    min-width: 56px;
+    width: 40px;
+    min-width: 32px;
 }
 
 .brand-logo-full,
@@ -110,7 +110,7 @@ img {
 }
 
 .brand-logo-full {
-    height: 64px;
+    height: 40px;
 }
 
 .wl-nav-links {
