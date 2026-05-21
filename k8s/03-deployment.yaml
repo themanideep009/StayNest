@@ -6,7 +6,7 @@ metadata:
   labels:
     app: staynest
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: staynest
@@ -17,27 +17,20 @@ spec:
     spec:
       containers:
         - name: staynest
-          image: your-dockerhub-username/staynest:latest
+          image: 028969191757.dkr.ecr.us-east-1.amazonaws.com/staynest:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
-          envFrom:
-            - configMapRef:
-                name: staynest-config
-            - secretRef:
-                name: staynest-secret
-          readinessProbe:
-            httpGet:
-              path: /healthz
-              port: 3000
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /healthz
-              port: 3000
-            initialDelaySeconds: 30
-            periodSeconds: 20
+          env:
+            - name: PORT
+              value: "3000"
+            - name: NODE_ENV
+              value: "production"
+            - name: MONGO_URL
+              valueFrom:
+                secretKeyRef:
+                  name: staynest-secrets
+                  key: mongo-url
           resources:
             requests:
               cpu: 100m

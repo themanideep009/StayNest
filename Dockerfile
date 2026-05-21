@@ -1,21 +1,3 @@
-<<<<<<< HEAD
-FROM node:20-alpine AS dependencies
-
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --omit=dev
-
-FROM node:20-alpine AS runtime
-
-ENV NODE_ENV=production
-WORKDIR /app
-
-COPY --from=dependencies /app/node_modules ./node_modules
-COPY . .
-
-EXPOSE 3000
-CMD ["npm", "start"]
-=======
 # ─── Stage 1: Build dependencies ───────────────────────────────────────────
 FROM node:20-alpine AS deps
 
@@ -58,4 +40,3 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
 
 # Start the app
 CMD ["node", "app.js"]
->>>>>>> 8b1bb6126931a75f78a495c20b136b676ba4a952

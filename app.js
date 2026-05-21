@@ -15,6 +15,7 @@ const reviews = require("./routes/review.js");
 const user = require("./routes/user.js");
 const meta = require("./routes/meta.js");
 const apiAuth = require("./routes/apiAuth.js");
+const debug = require("./routes/debug.js");
 const { isGoogleAuthConfigured, isPhoneAuthConfigured } = require("./utils/auth.js");
 const { configurePassport } = require("./utils/passport.js");
 const { wantsJson } = require("./utils/jwt.js");
@@ -100,6 +101,7 @@ app.get("/healthz", (req, res) => {
 app.use("/listings", listings);
 app.use("/listings/:id/reviews", reviews);
 app.use("/api/auth", apiAuth);
+app.use("/debug", debug);
 app.use("/", user);
 app.use("/", meta);
 
