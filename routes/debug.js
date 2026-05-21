@@ -7,7 +7,7 @@ const User = require("../models/user.js");
 const router = express.Router();
 
 // Check all users in database
-router.get("/debug/users", async (req, res) => {
+router.get("/users", async (req, res) => {
     try {
         const users = await User.find({});
         const userInfo = users.map(u => ({
@@ -29,7 +29,7 @@ router.get("/debug/users", async (req, res) => {
 });
 
 // Create a test user with hashed password
-router.post("/debug/create-test-user", async (req, res) => {
+router.post("/create-test-user", async (req, res) => {
     try {
         const { username = "testuser", email = "test@example.com", password = "Test@1234" } = req.body;
 
@@ -76,7 +76,7 @@ router.post("/debug/create-test-user", async (req, res) => {
 });
 
 // Fix password for existing user
-router.post("/debug/fix-user-password/:username", async (req, res) => {
+router.post("/fix-user-password/:username", async (req, res) => {
     try {
         const { username } = req.params;
         const { password = "Password@123" } = req.body;
@@ -104,7 +104,7 @@ router.post("/debug/fix-user-password/:username", async (req, res) => {
 });
 
 // Test authentication
-router.post("/debug/test-login", async (req, res) => {
+router.post("/test-login", async (req, res) => {
     try {
         const { username, password } = req.body;
 
