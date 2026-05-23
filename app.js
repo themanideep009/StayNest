@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const session = require("express-session");
+const MongoStore = require("connect-mongo");
 const flash = require("connect-flash");
 const passport = require("passport");
 
@@ -42,11 +43,39 @@ app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
 if (NODE_ENV === "production") {
+    app.use((req, res, next) => {
+        const start = Date.now();
+        res.on("finish", () => {
+            const duration = Date.now() - start;
+            console.log(JSON.stringify({
+                timestamp: new Date().toISOString(),
+                method: req.method,
+                url: req.originalUrl,
+                status: res.statusCode,
+                durationMs: duration,
+                ip: req.ip,
+                userAgent: req.get("user-agent")
+            }));
+        });
+        next();
+    });
+} else {
+    app.use((req, res, next) => {
+        console.log(`${req.method} ${req.url}`);
+        next();
+    });
+}
+
+if (NODE_ENV === "production") {
     app.set("trust proxy", 1);
 }
 
 app.use(
     session({
+        store: MongoStore.create({
+            mongoUrl: MONGO_URL,
+            touchAfter: 24 * 3600
+        }),
         secret: SESSION_SECRET,
         resave: false,
         saveUninitialized: false,

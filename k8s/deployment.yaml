@@ -19,6 +19,9 @@ spec:
     metadata:
       labels:
         app: staynest
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "3000"
     spec:
       # ── Security context ────────────────────────────────────────────────────
       securityContext:
@@ -46,53 +49,13 @@ spec:
             - name: SESSION_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: staynest-secret
-                  key: SESSION_SECRET
-            - name: JWT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: staynest-secret
-                  key: JWT_SECRET
+                  name: staynest-secrets
+                  key: session-secret
             - name: MONGO_URL
               valueFrom:
                 secretKeyRef:
-                  name: staynest-secret
-                  key: MONGO_URL
-            - name: GOOGLE_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: staynest-secret
-                  key: GOOGLE_CLIENT_ID
-            - name: GOOGLE_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: staynest-secret
-                  key: GOOGLE_CLIENT_SECRET
-            - name: TWILIO_ACCOUNT_SID
-              valueFrom:
-                secretKeyRef:
-                  name: staynest-secret
-                  key: TWILIO_ACCOUNT_SID
-            - name: TWILIO_AUTH_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: staynest-secret
-                  key: TWILIO_AUTH_TOKEN
-            - name: TWILIO_VERIFY_SERVICE_SID
-              valueFrom:
-                secretKeyRef:
-                  name: staynest-secret
-                  key: TWILIO_VERIFY_SERVICE_SID
-            - name: SMTP_USER
-              valueFrom:
-                secretKeyRef:
-                  name: staynest-secret
-                  key: SMTP_USER
-            - name: SMTP_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: staynest-secret
-                  key: SMTP_PASS
+                  name: staynest-secrets
+                  key: mongo-url
 
           # ── Resource limits ────────────────────────────────────────────────
           resources:

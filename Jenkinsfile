@@ -45,6 +45,18 @@ pipeline {
             }
         }
 
+        stage('Test') {
+            steps {
+                script {
+                    sh '''
+                        echo "Running automated unit and integration tests..."
+                        npm run test
+                        echo "✓ All tests passed successfully!"
+                    '''
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 script {

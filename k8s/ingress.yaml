@@ -22,6 +22,10 @@ metadata:
     alb.ingress.kubernetes.io/healthy-threshold-count: "2"
     alb.ingress.kubernetes.io/unhealthy-threshold-count: "3"
 spec:
+  tls:
+    - hosts:
+        - staynest.yourdomain.com
+      secretName: staynest-tls-cert
   rules:
     - host: staynest.yourdomain.com    # ← update to your domain
       http:
