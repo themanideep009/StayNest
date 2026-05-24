@@ -64,8 +64,8 @@ jobs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         IMAGE_TAG: ${{ github.sha }}
       run: |
-        kubectl set image deployment/staynest-app staynest=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -n ${{ env.EKS_NAMESPACE }}
-        kubectl rollout status deployment/staynest-app -n ${{ env.EKS_NAMESPACE }} --timeout=5m
+        kubectl set image deployment/staynest staynest=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -n ${{ env.EKS_NAMESPACE }}
+        kubectl rollout status deployment/staynest -n ${{ env.EKS_NAMESPACE }} --timeout=5m
     
     - name: Verify deployment
       run: |
