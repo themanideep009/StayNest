@@ -70,12 +70,16 @@ if (NODE_ENV === "production") {
     app.set("trust proxy", 1);
 }
 
+const sessionStore = NODE_ENV === "test"
+    ? undefined
+    : MongoStore.create({
+          mongoUrl: MONGO_URL,
+          touchAfter: 24 * 3600
+      });
+
 app.use(
     session({
-        store: MongoStore.create({
-            mongoUrl: MONGO_URL,
-            touchAfter: 24 * 3600
-        }),
+        store: sessionStore,
         secret: SESSION_SECRET,
         resave: false,
         saveUninitialized: false,
