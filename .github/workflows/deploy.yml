@@ -33,7 +33,7 @@ jobs:
     - name: Run integration tests
       run: |
         cd StayNest
-        npm ci
+        npm install
         npm run test
     
     - name: Build, tag, and push image to Amazon ECR
