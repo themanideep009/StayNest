@@ -1,4 +1,4 @@
-# Trigger fresh build with updated secrets
+# Secrets successfully configured - triggering final build
 name: Build and Deploy to EKS
 
 on:
