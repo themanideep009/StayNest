@@ -1,0 +1,22 @@
+[Unit]
+Description=StayNest Automated Shutdown S3 Backup Hook
+# Ensure this unit runs BEFORE the network and basic systems are shut down
+DefaultDependencies=no
+Before=shutdown.target reboot.target halt.target
+After=network-online.target
+Requires=network-online.target
+
+[Service]
+Type=oneshot
+# RemainAfterExit is critical! It makes systemd treat the service as "active" on boot.
+# If it is not active, ExecStop will not be triggered when the system shuts down.
+RemainAfterExit=yes
+ExecStart=/bin/true
+# The actual backup action executed during system shutdown
+ExecStop=/home/ubuntu/cloudproject/StayNest/scripts/staynest-shutdown-backup.sh staynest-media-028969191757
+StandardOutput=journal+console
+StandardError=journal+console
+TimeoutSec=120
+
+[Install]
+WantedBy=multi-user.target

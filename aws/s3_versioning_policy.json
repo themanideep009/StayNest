@@ -1,0 +1,51 @@
+{
+  "Rules": [
+    {
+      "ID": "StayNestSnapshotLifecycleRule",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "snapshots/"
+      },
+      "Transitions": [
+        {
+          "Days": 30,
+          "StorageClass": "GLACIER"
+        }
+      ],
+      "Expiration": {
+        "Days": 90
+      },
+      "NoncurrentVersionTransitions": [
+        {
+          "NoncurrentDays": 14,
+          "StorageClass": "GLACIER"
+        }
+      ],
+      "NoncurrentVersionExpiration": {
+        "NoncurrentDays": 60
+      },
+      "AbortIncompleteMultipartUpload": {
+        "DaysAfterInitiation": 7
+      }
+    },
+    {
+      "ID": "StayNestMediaLifecycleRule",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "listings/"
+      },
+      "NoncurrentVersionTransitions": [
+        {
+          "NoncurrentDays": 30,
+          "StorageClass": "GLACIER"
+        }
+      ],
+      "NoncurrentVersionExpiration": {
+        "NoncurrentDays": 90
+      },
+      "AbortIncompleteMultipartUpload": {
+        "DaysAfterInitiation": 7
+      }
+    }
+  ]
+}

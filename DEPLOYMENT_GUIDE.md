@@ -403,11 +403,136 @@ helm install velero vmware-tanzu/velero --namespace velero --create-namespace
 
 ---
 
+## Phase 10: Automated AWS Stopped-Service S3 & EBS Snapshotting
+
+Workloads are frequently stopped or scaled down (e.g., stopping EC2 instances manually, Spot Interruption events, or nightly shut-downs to save costs). Without active automated hooks, temporary logs, dynamic configuration tweaks, and uncommitted database files can be lost, and EBS drives risk corruption. 
+
+We resolve this with a multi-layered automation system:
+1. **S3 Native Version Snapshots**: Continuous file history tracking with automatic transition of old backups to cold storage (Glacier) to keep costs near zero.
+2. **Serverless EBS Volume Snapshotting**: An EventBridge rule that detects when compute nodes transition to `stopping` or `stopped` states, triggering a Lambda to execute crash-consistent disk backups.
+3. **Local EC2 Graceful Shutdown S3 Sync Hook**: A systemd hook daemon that intercept the OS shutdown process, delays power-down, and tarballs configurations, environment files, and active container logs, uploading them safely to S3.
+
+---
+
+### Step 10.1: Configure S3 Object Versioning & Lifecycle Rules
+
+Enabling S3 versioning creates an immutable point-in-time snapshot log for every file in your bucket (`staynest-media-028969191757`). To apply cost-optimized rules (pruning and cold-storage transitions):
+
+```powershell
+# 1. Enable Object Versioning on the bucket
+aws s3api put-bucket-versioning `
+  --bucket staynest-media-028969191757 `
+  --versioning-configuration Status=Enabled
+
+# 2. Apply our premium lifecycle policy (Glacier transition + old version pruning)
+aws s3api put-bucket-lifecycle-configuration `
+  --bucket staynest-media-028969191757 `
+  --lifecycle-configuration file://aws/s3_versioning_policy.json
+```
+
+---
+
+### Step 10.2: Deploy EventBridge + EBS Snapshot Lambda Stack
+
+We package the event handlers, IAM roles, and Lambdas together in a one-click AWS CloudFormation stack.
+
+#### Deployment via AWS CLI:
+```powershell
+aws cloudformation create-stack `
+  --stack-name StayNest-Backup-Automation-Stack `
+  --template-body file://aws/cloudformation-template.yaml `
+  --capabilities CAPABILITY_NAMED_IAM `
+  --parameters ParameterKey=EnvironmentName,ParameterValue=Production
+```
+
+#### Verification:
+1. Go to the **CloudFormation** console and verify the `StayNest-Backup-Automation-Stack` creates successfully.
+2. Once the stack is green, navigate to **Lambda** to verify `StayNest-Production-EBSBackupHandler` is ready.
+3. Stop your EC2 instance (`staynest-production` or node instance).
+4. Go to **EC2 Dashboard -> Snapshots**; you will see new EBS volume snapshots automatically spinning up, tagged with `TriggerEvent: EC2-STOPPING` and `BackupSystem: StayNest-Backup-Automation`.
+
+---
+
+### Step 10.3: Install the Local EC2 Shutdown S3 Sync Hook
+
+To capture files on the server itself (environment keys, Nginx configurations, and application logs) right before the EC2 host stops:
+
+```bash
+# Connect to your EC2 instance via SSH
+ssh -i "your-key.pem" ubuntu@ec2-3-234-224-71.compute-1.amazonaws.com
+
+# 1. Create directory structure if needed
+mkdir -p /home/ubuntu/cloudproject/StayNest/scripts
+
+# 2. Copy staynest-shutdown-backup.sh to the target directory
+# (Or write/rsync it directly)
+
+# 3. Make the script executable
+chmod +x /home/ubuntu/cloudproject/StayNest/scripts/staynest-shutdown-backup.sh
+
+# 4. Copy staynest-backup.service to the systemd folder
+sudo cp /home/ubuntu/cloudproject/StayNest/scripts/staynest-backup.service /etc/systemd/system/staynest-backup.service
+
+# 5. Reload systemd daemon to register the new backup hook
+sudo systemctl daemon-reload
+
+# 6. Enable the backup daemon to run on startup
+sudo systemctl enable staynest-backup.service
+
+# 7. Start the service (runs a dummy command on boot to mark it active)
+sudo systemctl start staynest-backup.service
+
+# 8. Check service status (should say active/running)
+sudo systemctl status staynest-backup.service
+```
+
+When you trigger a stop (`sudo poweroff` or AWS console action), systemd will wait until `/home/ubuntu/cloudproject/StayNest/scripts/staynest-shutdown-backup.sh` completes its backup upload to S3 before actually cutting the power!
+
+---
+
+### Step 10.4: Backup Verification & Disaster Recovery Guide
+
+#### Scenario A: The EC2 instance was corrupted/deleted, and you need to restore files from the S3 Shutdown Snapshot.
+1. Provision a new Ubuntu 22.04 LTS instance.
+2. Ensure the AWS CLI is configured with the instance profile role.
+3. Download the latest backup from S3:
+   ```bash
+   aws s3 cp s3://staynest-media-028969191757/snapshots/ $(aws s3 ls s3://staynest-media-028969191757/snapshots/ | sort | tail -n 1 | awk '{print $4}') .
+   ```
+4. Extract the backup tarball to restore your `.env` keys, Nginx files, and logs:
+   ```bash
+   tar -xzf staynest-state-backup-*.tar.gz -C /home/ubuntu/cloudproject/StayNest/
+   ```
+
+#### Scenario B: Recovering an EBS Volume from an Automated Stopped-State Snapshot.
+1. In the AWS console, navigate to **EC2 -> Elastic Block Store -> Snapshots**.
+2. Select your stopping-triggered snapshot (e.g., `staynest-production-sda1-stop-backup`).
+3. Click **Actions -> Create Volume from Snapshot**. Select the matching availability zone.
+4. Go to **Instances**, select the stopped instance, detach the broken volume, and attach this newly created volume as the root device (usually `/dev/sda1` or `/dev/xvda`).
+5. Restart the instance. Your OS and files are restored precisely to the moment the service was shut down!
+
+---
+
+## Cost Estimate (AWS Free Tier)
+- EKS Cluster: ~$73/month
+- EC2 Nodes (2): ~$40/month
+- ECR: ~$0.10/GB stored
+- S3 Bucket Storage: Standard costs cover active images.
+- **S3 Versioning / Lifecycle Backups**: ~$0.004/GB in S3 Glacier Deep Archive (Extreme Cost-Savings).
+- **Automated EBS Snapshots**: ~$0.05/GB of snapshot data stored (incremental changes only).
+- **Lambda & EventBridge Automation**: 100% Free Tier (1 Million Lambda requests free per month).
+
+**Total Monthly Cost: ~$115 - $118 (highly optimized for professional recovery protection)**
+
+---
+
 ## Next Steps
 1. Set up AWS account & EKS cluster (Step 1)
 2. Containerize and push to ECR (Step 2)
 3. Deploy to Kubernetes (Step 3)
 4. Set up GitHub Actions (Step 4)
 5. Configure monitoring (Step 5)
+6. **Set up Automated Stopped-Service S3 & EBS Snapshotting (Step 10)**
 
 Ready to start? Let me know which phase you want to begin with! 🚀
+

@@ -1,0 +1,199 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'StayNest Backup System: Automated EBS snapshot creation on EC2 Instance stopping or stopped events.'
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: Production
+    Description: Environment name for resource tagging.
+    AllowedValues: [Production, Staging, Development]
+
+Resources:
+  # IAM Execution Role for Lambda
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'StayNest-${EnvironmentName}-EBSBackupLambdaRole'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      Policies:
+        - PolicyName: EBSBackupAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # Perms to write logs to CloudWatch
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: 'arn:aws:logs:*:*:*'
+              # Perms to discover EC2 resources and invoke snapshot actions
+              - Effect: Allow
+                Action:
+                  - ec2:DescribeInstances
+                  - ec2:DescribeVolumes
+                  - ec2:CreateSnapshot
+                  - ec2:CreateTags
+                Resource: '*'
+
+  # Lambda Function containing EBS Snapshot automation logic
+  EBSBackupLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'StayNest-${EnvironmentName}-EBSBackupHandler'
+      Handler: index.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.11
+      Timeout: 60
+      MemorySize: 128
+      Tags:
+        - Key: Environment
+          Value: !Ref EnvironmentName
+        - Key: App
+          Value: StayNest
+        - Key: ManagedBy
+          Value: CloudFormation
+      Code:
+        ZipFile: |
+          import json
+          import logging
+          import datetime
+          import boto3
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+          ec2_client = boto3.client('ec2')
+
+          def lambda_handler(event, context):
+              logger.info("Received event: %s", json.dumps(event))
+              detail = event.get('detail', {})
+              instance_id = detail.get('instance-id')
+              state = detail.get('state')
+              region = event.get('region')
+              
+              if not instance_id:
+                  logger.error("No Instance ID found in the event payload.")
+                  return {'statusCode': 400, 'body': 'Missing instance-id'}
+                  
+              logger.info("Triggered EBS snapshots for EC2: %s (State: %s)", instance_id, state)
+              
+              try:
+                  response = ec2_client.describe_instances(InstanceIds=[instance_id])
+                  reservations = response.get('Reservations', [])
+                  if not reservations:
+                      logger.error("EC2 Instance %s not found.", instance_id)
+                      return {'statusCode': 404, 'body': f"EC2 Instance {instance_id} not found"}
+                      
+                  instance_details = reservations[0].get('Instances', [])[0]
+                  block_device_mappings = instance_details.get('BlockDeviceMappings', [])
+                  
+                  instance_name = "UnnamedInstance"
+                  for tag in instance_details.get('Tags', []):
+                      if tag.get('Key') == 'Name':
+                          instance_name = tag.get('Value')
+                          break
+                          
+                  if not block_device_mappings:
+                      logger.info("No volumes attached to instance %s.", instance_id)
+                      return {'statusCode': 200, 'body': 'No volumes attached'}
+                      
+                  created_snapshots = []
+                  timestamp = datetime.datetime.utcnow().strftime('%Y-%m-%d-%H%M%S')
+                  
+                  for device in block_device_mappings:
+                      volume_id = device.get('Ebs', {}).get('VolumeId')
+                      device_name = device.get('DeviceName')
+                      if not volume_id:
+                          continue
+                          
+                      snapshot_description = (
+                          f"Automated snapshot of {volume_id} ({device_name}) "
+                          f"attached to EC2 Instance {instance_id} ({instance_name}) "
+                          f"triggered on instance {state} state at {timestamp} UTC."
+                      )
+                      
+                      logger.info("Creating snapshot for volume %s...", volume_id)
+                      snapshot = ec2_client.create_snapshot(
+                          VolumeId=volume_id,
+                          Description=snapshot_description,
+                          TagSpecifications=[
+                              {
+                                  'ResourceType': 'snapshot',
+                                  'Tags': [
+                                      {'Key': 'Name', 'Value': f"{instance_name}-{device_name}-stop-backup"},
+                                      {'Key': 'InstanceId', 'Value': instance_id},
+                                      {'Key': 'InstanceName', 'Value': instance_name},
+                                      {'Key': 'VolumeId', 'Value': volume_id},
+                                      {'Key': 'DeviceName', 'Value': device_name},
+                                      {'Key': 'TriggerEvent', 'Value': f"EC2-{state.upper()}"},
+                                      {'Key': 'BackupSystem', 'Value': 'StayNest-Backup-Automation'},
+                                      {'Key': 'Timestamp', 'Value': timestamp}
+                                  ]
+                              }
+                          ]
+                      )
+                      created_snapshots.append(snapshot.get('SnapshotId'))
+                      
+                  return {
+                      'statusCode': 200,
+                      'body': json.dumps({'message': 'Initiated snapshots', 'snapshots': created_snapshots})
+                  }
+              except Exception as e:
+                  logger.exception("Failed to snapshot instance %s", instance_id)
+                  return {'statusCode': 500, 'body': str(e)}
+
+  # Log Group for Lambda to define retention (prevents logs accumulating forever)
+  EBSBackupLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${EBSBackupLambdaFunction}'
+      RetentionInDays: 30
+
+  # EventBridge Rule triggering on EC2 instance stopping or stopped state transitions
+  EC2StateChangeEventRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub 'StayNest-${EnvironmentName}-EC2StopBackupTrigger'
+      Description: Triggers EBS snapshot Lambda when EC2 instances transition to stopping or stopped.
+      EventPattern:
+        source:
+          - aws.ec2
+        detail-type:
+          - EC2 Instance State-change Notification
+        detail:
+          state:
+            - stopping
+            - stopped
+      State: ENABLED
+      Targets:
+        - Arn: !GetAtt EBSBackupLambdaFunction.Arn
+          Id: EBSBackupLambdaTarget
+
+  # Permission allowing EventBridge to invoke our Lambda function
+  PermissionForEventsToInvokeLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref EBSBackupLambdaFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt EC2StateChangeEventRule.Arn
+
+Outputs:
+  LambdaFunctionArn:
+    Description: ARN of the EBS Backup Lambda Function
+    Value: !GetAtt EBSBackupLambdaFunction.Arn
+    Export:
+      Name: !Sub 'StayNest-${EnvironmentName}-EBSBackupLambdaArn'
+
+  EventRuleArn:
+    Description: ARN of the EventBridge State-change Rule
+    Value: !GetAtt EC2StateChangeEventRule.Arn
